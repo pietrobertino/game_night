@@ -7,8 +7,11 @@ Lo scopo del progetto è quello di creare una webapp (indirizzata ai dispositivi
 Lato Frontend:
 
 npm i 
+
 npm run dev
 
 Lato Backend:
+
 npm i 
+
 npm run dev
