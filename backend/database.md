@@ -1,28 +1,37 @@
 ## Tables:
 
-Tabella utenti per salvare le informazioni degli utenti registrati
-(appunto: per ogni utente c'è una lista di giochi preferiti)
-
-Tabella giochi
-serve inserirla nel datbase? Beh direi di si, è un po come i prodotti nell'ecommerce. però sorge un problema, non è detto che ogni singolo gioco contenga le stesse informazioni, quindi come gestisco la cosa?
-facciamo un esempio: 
-lupus e l'impostore.
-sicuramente ognuno dei due giochi ha cose come un titolo, il testo relativo alle regole, il numero di giocatori, che so la difficoltà e altre cose. ma detto questo i due giochi funzionano in maniera completamente diversa. beh ma il funzionamentpo del gioco sicuramente è una roba tutto lato frontend i guess? immagino comunque che le informazioni sul singolo gioco e magari (forse sopratutto), il reindirizzamento all'url giusto per il gioco possano essere messi lato backend, anche solo per essere ipoteticamente inseriti all'interno della lista dei preferiti dell'utente.
-
-le sessioni sono letteralmente sessioni quindi non c'e alcun motivo di inserirle in backend.
-
-
-## Utenti:
+## USERS:
 
 - id PRIMARY KEY INDEX (INT UNIQUE AUTO_INCREMENT NOTNULL)
-- email_address INDEX (VARCHAR(50) UNIQUE NOTNULL)
-- password (VARCHAR(50) NOTNULL)
-- nickname (VARCHAR(50) NOTNULL)
+- email_address INDEX (VARCHAR(50) UNIQUE )
+- password_hash (VARCHAR(50) )
+- account_type (ENUM:('REGISTRATO', 'OSPITE') NOTNULL)
+- created_at (DATETIME NOTNULL)
+
+## LOBBYS:
+
+- id PRIMARY KEY INDEX (INT UNIQUE AUTO_INCREMENT NOTNULL)
+- lobby_code INDEX (VARCHAR(10) UNIQUE NOTNULL) (Il codice tipo XFDE per il link)
+- admin_id FOREIGN KEY references USERS(id) (INT NOTNULL) (Chi comanda la stanza)
+- global_status (ENUM:('LOBBY', 'IN_GIOCO', 'RISULTATI') NOTNULL DEFAULT 'LOBBY')
+- current_game_id FOREIGN KEY references GAMES(id) (VARCHAR(50)) (NULL se sono in lobby)
+- created_at (DATETIME NOTNULL)
 
 
-## Games:
+## GAMES:
 
-- id PRIMARY KEY INDEX (MEDIUMINT UNIQUE AUTO_INCREMENT NOTNULL)
-- title INDEX (VARCHAR(50) UNIQUE NOTNULL)
-- rules (TEXT NOTNULL)
-- max_players (TINYINT)
+- id PRIMARY KEY INDEX (INT UNIQUE AUTO_INCREMENT NOTNULL)
+- title (VARCHAR(100) NOTNULL) (Es: 'L'Impostore 🕵️‍♂️')
+- description (TEXT NOTNULL) (Le regole del gioco)
+- min_players (INT NOTNULL)
+- max_players (INT )
+
+
+## LOBBY_PLAYERS:
+- lobby_id FOREIGN KEY references LOBBYS(id) (INT NOTNULL)
+- user_id FOREIGN KEY references USERS(id) (INT NOTNULL)
+- nickname (VARCHAR(30) NOTNULL) (Il nome scelto per la serata, libero e non unico)
+- connection_status (ENUM:('ONLINE', 'OFFLINE') NOTNULL DEFAULT 'ONLINE')
+- game_data (JSON) (Il jolly! Qui dentro salvi i ruoli segreti in formato JSON)
+- joined_at (DATETIME NOTNULL)
+- CONSTRAINT UNIQUE (lobby_id, user_id) (Impedisce lo sdoppiamento dello stesso utente nella stessa stanza)
