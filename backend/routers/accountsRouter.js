@@ -11,5 +11,11 @@ router.get('/:mail', accountController.showAccount)
 // destroy account
 router.delete('/:mail', accountController.destroyAccount);
 
+//Store account favourite
+router.post('/:mail/favourites/:gameId', accountController.storeFavourite);
+
+//Delete account favourite
+router.delete('/:mail/favourites/:gameId', accountController.destroyFavourite);
+
 
 module.exports = router;

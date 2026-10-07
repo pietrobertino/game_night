@@ -15,4 +15,18 @@ const destroyAccount = (req, res) => {
     res.send(`eliminazione account con mail ${mail}`);
 }
 
-module.exports = { showAccount, store, destroyAccount };
+const storeFavourite = (req, res) => {
+
+    const { mail, gameId } = req.params;
+
+    res.send(`Aggiungo il gioco ${gameId} (se esiste) ai preferiti dell'account con mail ${mail}, se esiste `)
+}
+
+const destroyFavourite = (req, res) => {
+
+    const { mail, gameId } = req.params;
+
+    res.send(`Elimino il gioco ${gameId} dai preferiti (se questo esiste ed è presente) dell'account con mail ${mail}, se questo esiste`);
+}
+
+module.exports = { showAccount, store, destroyAccount, storeFavourite, destroyFavourite };
