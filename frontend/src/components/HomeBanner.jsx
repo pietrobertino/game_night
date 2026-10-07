@@ -2,7 +2,7 @@ export default function HomeBanner() {
 
     return (
         <div>
-            banner
+            test github
         </div>
     )
 }
