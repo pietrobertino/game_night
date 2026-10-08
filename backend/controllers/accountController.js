@@ -46,10 +46,12 @@ const store = async (req, res) => {
 
     const { accountType } = req.params;
 
-    const { mail, password, nickname } = req.body; //mail, password possono essere vuoti (ingresso come guest)
+    const { nickname } = req.body; //mail, password possono essere vuoti (ingresso come guest)
 
     //verifico che nel caso in cui si stia registrando un nuovo account siano presenti mail e password nel body, e li valido tramite zod
     if (accountType === 'registration') {
+
+        const { mail, password } = req.body;
 
         //devono essere presenti mail e password (e nickname)
         if (!mail || !password || !nickname) return res.status(400).json({ error: "bad request", message: "Password, Email or Nickname missing" });
