@@ -115,8 +115,37 @@ const store = async (req, res) => {
 }
 
 const destroyAccount = (req, res) => {
-    const { mail } = req.params;
-    res.send(`eliminazione account con mail ${mail}`);
+
+    const { mail, password } = req.body;
+
+    //eseguo lo stesso processo di verifica della rotta access account
+    const sql = `SELECT id, email_address, password_hash FROM users WHERE email_address = ? `;
+
+    db.query(sql, [mail], async (err, results) => {
+
+        //gestisco errore interno database
+        if (err) return res.status(500).json({
+            error: true,
+            message: err
+        });
+
+        //gestisco nessun risultato trovato
+        if (results.length === 0) return res.status(404).json({ error: 'Account not found' });
+
+        //verifico che le password corrispondando
+        const match = await bcrypt.compare(password, results[0].password_hash);
+
+        //se email e password corrispondono elimino l'account
+        if (!match) return res.status(401).json({ access: false, message: "Password is wrong" });
+
+        const deleteSql = `DELETE FROM users WHERE email_address = ?`;
+        db.query(deleteSql, [mail], (err, results) => {
+            if (err) return res.status(500).json({ error: 'database error', message: err });
+            res.status(200).json({ message: 'deletion complete' });
+        })
+
+
+    })
 }
 
 const storeFavourite = (req, res) => {

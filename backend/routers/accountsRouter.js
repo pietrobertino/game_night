@@ -3,13 +3,13 @@ const router = express.Router();
 const accountController = require('../controllers/accountController');
 
 // Store account/guest 
-router.post('/:accountType', accountController.store);
+router.post('/create/:accountType', accountController.store);
 
 //access to an existing account
 router.post('/', accountController.accessAccount)
 
 // destroy account
-router.delete('/:mail', accountController.destroyAccount);
+router.post('/delete', accountController.destroyAccount);
 
 //Store account favourite
 router.post('/:mail/favourites/:gameId', accountController.storeFavourite);
