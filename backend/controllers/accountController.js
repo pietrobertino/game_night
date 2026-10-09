@@ -42,7 +42,7 @@ const accessAccount = (req, res) => {
 
 }
 
-const store = async (req, res) => {
+const store = (req, res) => {
 
     const { accountType } = req.params;
 
@@ -70,26 +70,27 @@ const store = async (req, res) => {
 
         //verifico che non esista già un account registrato con quella mail
         const checkSql = 'SELECT email_address FROM users WHERE email_address = ?;';
-        db.query(checkSql, [cleanMail], (err, results) => {
+        db.query(checkSql, [cleanMail], async (err, results) => {
             if (err) return res.status(500).json({ error: true, message: err });
             if (results.length > 0) return res.status(409).json({ error: true, message: 'the e-mail is already in the database' });
+
+            //hash password 
+            const hash = await bcrypt.hash(cleanPassword, 10);
+
+            //inserisco la registrazione dell'account nel database
+            const sql = `INSERT INTO users (email_address, password_hash, account_type, nickname) VALUES (?, ?, ?, ?);`
+
+            db.query(sql, [cleanMail, hash, accountType, nickname], (err, results) => {
+
+                //gestisco errore db 
+                if (err) return res.status(500).json({ error: true, message: err });
+
+                //comunico risultato dell'operazione
+                res.status(201).json({ message: 'Account inserito correttamente' });
+            })
         })
 
 
-        //hash password 
-        const hash = await bcrypt.hash(cleanPassword, 10);
-
-        //inserisco la registrazione dell'account nel database
-        const sql = `INSERT INTO users (email_address, password_hash, account_type, nickname) VALUES (?, ?, ?, ?);`
-
-        db.query(sql, [cleanMail, hash, accountType, nickname], (err, results) => {
-
-            //gestisco errore db 
-            if (err) return res.status(500).json({ error: true, message: err });
-
-            //comunico risultato dell'operazione
-            res.status(201).json({ message: 'Account inserito correttamente' });
-        })
     }
 
     //caso ingresso come guest

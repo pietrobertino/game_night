@@ -1,19 +1,37 @@
+import { useState } from "react"
+import GuestForm from "../components/GuestForm";
+import RegistrationForm from "../components/RegistrationForm";
+import LoginForm from "../components/LoginForm";
+
 export default function AccessPage() {
 
-    //logica per ingresso come guest, assegnazione diritti di guest tramite variabile reattiva
-
-    //accesso con account esistente, diritti accout
-
-    //registrazione, diritti account
-
-    //con cookie, accesso ad account esistente, diritti account, salti questa pagina
-
-    //mi salvo anche l'id del player in una variabile reattiva, così posso usarlo per capire se è admin o guest della lobby, oltre che per fornirgli i dati di gioco giusti
-
-    //devo gestire tramite il link di invito il fatto che l'utente che acceda ad una lobby e che quindi prima di poter visualizzare la home compaia la schermata in attesa. In questo caso so già che i diritti dell'utente non sono admin
+    const [accessType, setAccessType] = useState('guest');
 
     return (
         <>
+            {accessType === 'guest' &&
+                <>
+                    <GuestForm />
+                    <a href="#" onClick={() => setAccessType('login')}>Ho un account</a>
+                    <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
+                </>
+            }
+            {accessType === 'login' &&
+                <>
+                    <LoginForm />
+                    <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
+                    <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
+                </>
+            }
+            {accessType === 'registration' &&
+                <>
+                    <RegistrationForm />
+                    <a href="#" onClick={() => setAccessType('login')}>Ho già un account</a>
+                    <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
+                </>
+            }
+
         </>
     )
+
 }
