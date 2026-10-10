@@ -48,6 +48,9 @@ const store = (req, res) => {
 
     const { nickname } = req.body; //mail, password possono essere vuoti (ingresso come guest)
 
+    //valido il nickname
+    if (nickname.length < 3 || nickname.length > 15) return res.status(400).json({ error: 'bad request', message: 'invalid nickname' });
+
     //verifico che nel caso in cui si stia registrando un nuovo account siano presenti mail e password nel body, e li valido tramite zod
     if (accountType === 'registration') {
 

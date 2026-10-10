@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 
-export default function Gamecard({ gameInfo }) {
+export default function Gamecard() {
 
     return (
-        <Link to={`/rules/${gameInfo.slug}`}>
+        <Link to={``}>
             <div className="card">
-                <h1>{gameInfo.title}</h1>
+                <h1>Carta</h1>
             </div>
         </Link>
     )

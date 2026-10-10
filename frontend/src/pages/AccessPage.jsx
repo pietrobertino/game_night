@@ -1,9 +1,6 @@
-import { useState } from "react"
-import GuestForm from "../components/GuestForm";
-import RegistrationForm from "../components/RegistrationForm";
-import LoginForm from "../components/LoginForm";
 import { useGlobal } from "../contexts/GlobalContext";
 import WaitingScreen from "../components/WaitingScreen";
+import AccessForm from "../components/AccessForm";
 
 export default function AccessPage() {
 
@@ -18,21 +15,21 @@ export default function AccessPage() {
                 <>
                     {accessType === 'guest' &&
                         <>
-                            <GuestForm />
+                            <AccessForm />
                             <a href="#" onClick={() => setAccessType('login')}>Ho un account</a>
                             <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
                         </>
                     }
                     {accessType === 'login' &&
                         <>
-                            <LoginForm />
+                            <AccessForm />
                             <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
                             <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
                         </>
                     }
                     {accessType === 'registration' &&
                         <>
-                            <RegistrationForm />
+                            <AccessForm />
                             <a href="#" onClick={() => setAccessType('login')}>Ho già un account</a>
                             <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
                         </>
