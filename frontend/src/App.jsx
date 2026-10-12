@@ -17,6 +17,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AccessPage />} />
+          <Route path="/:lobbyCode" element={<AccessPage />} />
           <Route element={<DefaultLayout />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/lobby" element={<LobbyPage />} />

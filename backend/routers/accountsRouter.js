@@ -17,5 +17,7 @@ router.post('/:mail/favourites/:gameId', accountController.storeFavourite);
 //Delete account favourite
 router.delete('/:mail/favourites/:gameId', accountController.destroyFavourite);
 
+//Aggiunta giocatore in at
+
 
 module.exports = router;
