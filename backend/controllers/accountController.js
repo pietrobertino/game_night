@@ -48,6 +48,7 @@ const accessAccount = (req, res) => {
         const match = await bcrypt.compare(password, results[0].password_hash);
 
         if (match) {
+            //setto il token del cookie con l'id dell'utente
             setSessionCookie(res, results[0].id);
             return res.status(200).json({
                 access: true,
@@ -105,6 +106,7 @@ const store = (req, res) => {
             db.query(sql, [cleanMail, hash, accountType, nickname], (err, results) => {
                 if (err) return res.status(500).json({ error: true, message: err });
 
+                //setto il token del cookie con l'id appena inserito
                 setSessionCookie(res, results.insertId);
                 res.status(201).json({
                     id: results.insertId,

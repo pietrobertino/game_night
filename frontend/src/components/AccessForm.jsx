@@ -1,11 +1,13 @@
 import { useState } from "react"
-import axios from "axios"
+import api from "../api";
 import { useGlobal } from "../contexts/GlobalContext"
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AccessForm() {
 
     const { invited, setWaiting, accessType, lobbyCode } = useGlobal();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const initialData = { email: '', password: '' }
@@ -35,9 +37,9 @@ export default function AccessForm() {
     const [regErr, setRegErr] = useState(false);
 
     //url per le chiamate axios
-    const guestUrl = 'http://localhost:3001/accounts/create/guest';
-    const loginUrl = 'http://localhost:3001/accounts';
-    const registrationUrl = 'http://localhost:3001/accounts/create/registration';
+    const guestUrl = '/accounts/create/guest';
+    const loginUrl = '/accounts';
+    const registrationUrl = '/accounts/create/registration';
 
     function handleForm(e) {
         e.preventDefault();
@@ -67,16 +69,21 @@ export default function AccessForm() {
         }
 
         if (notValid) return;
-        axios.post(url, data)
+        api.post(url, data)
             .then(response => {
                 console.log(response.data.message);
+                // salvo l'utente e collego il socket (il cookie ora esiste)
+                login({ id: response.data.id, nickname: response.data.nickname, account_type: accessType });
+
                 //se l'utente è stato invitato ad una lobby (non sta accedendo direttamente al sito)
                 if (invited) {
                     //invio la richiesta di accesso alla lobby
-                    axios.post(`http://localhost:3001/lobbys/${lobbyCode}/players`, {}, { withCredentials: true }) //il post sarà vuoto nell'app finita perché la backend leggerà in automatico userId tramite cookies
-                        .then(res => console.log(res.data.message))
+                    api.post(`/lobbys/${lobbyCode}/players`)
+                        .then(res => {
+                            console.log(res.data.message)
+                            //viene mandato alla pagina di accesso con la schermata di attesa
+                        })
                         .catch(err => console.error(err.response?.data?.message))
-                    //viene mandato alla pagina di accesso con la schermata di attesa
                     setWaiting(true);
                     navigate('/');
                 } else {
