@@ -32,6 +32,9 @@ const io = new Server(server, {
         credentials: true
     }
 });
+
+app.set('io', io);
+
 initGameSocket(io);
 
 //Chiamate API

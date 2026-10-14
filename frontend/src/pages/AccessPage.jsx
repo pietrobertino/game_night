@@ -6,14 +6,14 @@ import { useEffect } from "react";
 
 export default function AccessPage() {
 
-    const { accessType, setAccessType, waiting, setInvited } = useGlobal();
+    const { accessType, setAccessType, waiting, setInvited, setLobbyCode } = useGlobal();
 
     const { lobbyCode } = useParams();
 
     useEffect(() => {
-        //se nell'url tramite cui accedo a questa schermata c'è il codice di una lobby significa che sono stato invitato (però devo validare il lobby code in modo che non si possa semplicemente digitare qualunque cosa)
-        if (lobbyCode) setInvited(true);
-    })
+        //se nell'url tramite cui accedo a questa schermata c'è il codice di una lobby significa che sono stato invitato 
+        if (lobbyCode) setInvited(true); setLobbyCode(lobbyCode);
+    }, [])
 
 
 

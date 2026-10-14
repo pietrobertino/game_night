@@ -1,3 +1,16 @@
+const jwt = require('jsonwebtoken');
+
+// Crea il token e lo mette nel cookie. La uso in login e guest.
+const setSessionCookie = (res, userId) => {
+    const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    res.cookie('session_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax', //da modificare se non uso lo stesso dominio
+        maxAge: 30 * 24 * 60 * 60 * 1000
+    });
+};
 //import connection to databse
 const db = require('../data/db');
 //import bcrypt for hashing and reading passwords
@@ -35,8 +48,14 @@ const accessAccount = (req, res) => {
         const match = await bcrypt.compare(password, results[0].password_hash);
 
         if (match) {
-            return res.status(200).json({ access: true, message: 'Accesso riuscito' });
-        } else return res.status(401).json({ access: false, message: "Password is wrong" });
+            setSessionCookie(res, results[0].id);
+            return res.status(200).json({
+                access: true,
+                id: results[0].id,
+                nickname: results[0].nickname,
+                message: 'Accesso riuscito'
+            });
+        } else return res.status(401).json({ access: false, message: "Wrong password" });
 
     })
 
@@ -84,12 +103,14 @@ const store = (req, res) => {
             const sql = `INSERT INTO users (email_address, password_hash, account_type, nickname) VALUES (?, ?, ?, ?);`
 
             db.query(sql, [cleanMail, hash, accountType, nickname], (err, results) => {
-
-                //gestisco errore db 
                 if (err) return res.status(500).json({ error: true, message: err });
 
-                //comunico risultato dell'operazione
-                res.status(201).json({ message: 'Account inserito correttamente' });
+                setSessionCookie(res, results.insertId);
+                res.status(201).json({
+                    id: results.insertId,
+                    nickname,
+                    message: 'Account inserito correttamente'
+                });
             })
         })
 
@@ -105,15 +126,17 @@ const store = (req, res) => {
         const sql = `INSERT INTO users (email_address, password_hash, account_type, nickname) VALUES (null, null, ?, ?);`
 
         db.query(sql, [accountType, nickname], (err, results) => {
-
-            //gestisco errore db 
             if (err) return res.status(500).json({ error: true, message: err });
 
-            //comunico risultato dell'operazione
-            res.status(201).json({ message: 'Guest inserito correttamente' });
+            setSessionCookie(res, results.insertId);
+            res.status(201).json({
+                id: results.insertId,
+                nickname,
+                message: 'Guest inserito correttamente'
+            });
         })
     }
-    //come fare in modo di eliminare l'account dopo tot tempo dal database?
+
 
     //gestisco il caso in cui l'accountType non sia uno dei due previsti
     else return res.status(400).json({ error: 'bad request', message: 'invalid accountType' });
@@ -154,6 +177,28 @@ const destroyAccount = (req, res) => {
     })
 }
 
+// React la chiama all'apertura del sito per sapere se c'è già una sessione valida
+const me = (req, res) => {
+    db.query(`SELECT id, nickname, account_type FROM users WHERE id = ?`, [req.user.id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Internal database error' });
+
+        // il token è valido ma l'utente non esiste più (es. guest eliminato)
+        if (results.length === 0) return res.status(401).json({ error: 'Unauthorized' });
+
+        res.json(results[0]);
+    });
+};
+
+// il cookie è HttpOnly, quindi solo il server può cancellarlo
+const logout = (req, res) => {
+    res.clearCookie('session_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    });
+    res.json({ message: 'Logout effettuato' });
+};
+
 const storeFavourite = (req, res) => {
 
     const { mail, gameId } = req.params;
@@ -167,5 +212,4 @@ const destroyFavourite = (req, res) => {
 
     res.send(`Elimino il gioco ${gameId} dai preferiti (se questo esiste ed è presente) dell'account con mail ${mail}, se questo esiste`);
 }
-
-module.exports = { accessAccount, store, destroyAccount, storeFavourite, destroyFavourite };
+module.exports = { accessAccount, store, destroyAccount, storeFavourite, destroyFavourite, me, logout };

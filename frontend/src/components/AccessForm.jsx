@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function AccessForm() {
 
-    const { invited, setWaiting, accessType } = useGlobal();
+    const { invited, setWaiting, accessType, lobbyCode } = useGlobal();
     const navigate = useNavigate();
 
     const initialData = { email: '', password: '' }
@@ -72,10 +72,13 @@ export default function AccessForm() {
                 console.log(response.data.message);
                 //se l'utente è stato invitato ad una lobby (non sta accedendo direttamente al sito)
                 if (invited) {
+                    //invio la richiesta di accesso alla lobby
+                    axios.post(`http://localhost:3001/lobbys/${lobbyCode}/players`, {}, { withCredentials: true }) //il post sarà vuoto nell'app finita perché la backend leggerà in automatico userId tramite cookies
+                        .then(res => console.log(res.data.message))
+                        .catch(err => console.error(err.response?.data?.message))
                     //viene mandato alla pagina di accesso con la schermata di attesa
-                    navigate('/');
                     setWaiting(true);
-                    //qui dovrei inserire la logica che manda la richiesta di accesso all'admin della lobby
+                    navigate('/');
                 } else {
                     //altrimenti viene mandato alla home
                     navigate('/home');
