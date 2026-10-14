@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import LobbyPage from "./pages/LobbyPage";
 import AccessPage from "./pages/AccessPage";
 import PreGamePage from "./pages/PreGamePage";
+import GamePage from "./pages/GamePage";
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/lobby" element={<LobbyPage />} />
           <Route path="/rules/:gameSlug" element={<PreGamePage />} />
+          <Route path="/game/:gameSlug" element={<GamePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
