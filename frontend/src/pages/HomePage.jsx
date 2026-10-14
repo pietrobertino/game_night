@@ -5,15 +5,21 @@ import LobbyBanner from "../components/LobbyBanner"
 export default function HomePage() {
 
     //API call to get index games
+    const games = []
 
     return (
-        <>
+        <main className="home-page">
             <LobbyBanner />
-            <h1>Home Page</h1>
-            <HomeBanner />
-            {/* renderizzo le card dei giochi sulla base dei dati estratti dalla api call */}
-            <Gamecard />
-        </>
+            <h2 className="home-page__title">Scegli una modalità</h2>
 
+            {/* renderizzo le card dei giochi sulla base dei dati estratti dalla api call */}
+            <div className="game-list">
+                {games.map(game => (
+                    <Gamecard key={game.id} gameInfo={game} />
+                ))}
+            </div>
+
+            <HomeBanner />
+        </main>
     )
 }

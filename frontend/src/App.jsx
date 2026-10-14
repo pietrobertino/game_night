@@ -9,7 +9,6 @@ import AccountPage from "./pages/AccountPage";
 import { GlobalContextProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
 
-
 function App() {
 
   return (
