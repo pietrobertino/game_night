@@ -1,27 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const lobbyController = require('../controllers/lobbyController');
+const requireAuth = require('../middlewares/requireAuth');
 
-//store
-router.post('/', lobbyController.store);
+//store new lobby
+router.post('/', requireAuth, lobbyController.store);
 
 //show lobby
-router.get('/:id', lobbyController.show);
+router.get('/:lobbyCode', lobbyController.show);
 
 //destroy lobby
-router.delete('/:id', lobbyController.destroy);
+router.delete('/:lobbyCode', requireAuth, lobbyController.destroy);
 
-//Store Player in lobby
-router.post('/:lobbyId/players/:playerId', lobbyController.storePlayer);
+//Store player in attesa
+router.post('/:lobbyCode/players', requireAuth, lobbyController.storeWaitingPlayer);
 
-//Index Players
-router.get('/:id/players', lobbyController.indexPlayers);
+//Accettare player in attesa
+router.post('/:lobbyCode/players/accept/:playerId', requireAuth, lobbyController.acceptWaitingPlayer);
+
+//Index Players 
+router.get('/:lobbyCode/players', lobbyController.indexPlayers);
+
+//Destroy player from lobby (in attesa o membro)
+router.delete('/:lobbyCode/players/:playerId', requireAuth, lobbyController.destroyPlayer);
+
+//Leave lobby
+router.delete('/:lobbyCode/players', requireAuth, lobbyController.leaveLobby);
+
+
 
 //Show player from lobby
 router.get('/:lobbyId/players/:playerId', lobbyController.showPlayer);
 
-//Destroy player from lobby 
-router.delete('/:lobbyId/players/:playerId', lobbyController.destroyPlayer);
 
 //Modify Lobby admin
 router.patch('/:lobbyId/players/:playerId', lobbyController.modifyAdmin);

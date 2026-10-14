@@ -7,6 +7,7 @@ const initGameSocket = require('./sockets/gameSocket');
 const gamesRouter = require('./routers/gamesRouter');
 const lobbysRouter = require('./routers/lobbysRouter');
 const accountsRouter = require('./routers/accountsRouter');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +19,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('public'));
 
+//Configurazione CORS per l'app
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
+
 // Configurazione Socket.io
 const io = new Server(server, {
     cors: {
@@ -25,6 +32,9 @@ const io = new Server(server, {
         credentials: true
     }
 });
+
+app.set('io', io);
+
 initGameSocket(io);
 
 //Chiamate API
