@@ -8,6 +8,8 @@ import Page404 from "./pages/Page404";
 import AccountPage from "./pages/AccountPage";
 import { GlobalContextProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import GamePage from "./pages/GamePage";
+
 
 function App() {
 
