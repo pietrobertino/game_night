@@ -8,7 +8,7 @@ export function GlobalContextProvider({ children }) {
     const [invited, setInvited] = useState(false);
     const [waiting, setWaiting] = useState(false);
     const [admin, setAdmin] = useState(false);
-    const [lobbyCode, setLobbyCode] = useState(null);
+    const [lobbyCode, setLobbyCode] = useState('');
 
     return (
         <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode }}>

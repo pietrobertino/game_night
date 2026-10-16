@@ -18,7 +18,7 @@ export default function AccessForm() {
 
     //variabili per validare l'input del nickname
     const [nickTouched, setNickTouched] = useState(false); //all'inizio il campo input non è toccato
-    const nickValid = nickname.trim().length >= 3 && nickname.trim().length <= 15;
+    const nickValid = nickname.trim().length > 3 && nickname.trim().length <= 15;
     const showNickErr = !nickValid && nickTouched;
 
     //variabili per validare mail
@@ -71,9 +71,9 @@ export default function AccessForm() {
         if (notValid) return;
         api.post(url, data)
             .then(response => {
-                console.log(response.data.message);
+                console.log(response.data);
                 // salvo l'utente e collego il socket (il cookie ora esiste)
-                login({ id: response.data.id, nickname: response.data.nickname, account_type: accessType });
+                login({ id: response.data.id, nickname: response.data.nickname, account_type: response.data.account_type });
 
                 //se l'utente è stato invitato ad una lobby (non sta accedendo direttamente al sito)
                 if (invited) {

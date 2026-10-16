@@ -7,7 +7,7 @@ const requireAuth = require('../middlewares/requireAuth');
 router.get('/me', requireAuth, accountController.me);
 
 //logout
-router.post('/logout', accountController.logout);
+router.post('/logout', requireAuth, accountController.logout);
 
 // Store account/guest 
 router.post('/create/:accountType', accountController.store);
@@ -16,7 +16,10 @@ router.post('/create/:accountType', accountController.store);
 router.post('/', accountController.accessAccount)
 
 // destroy account
-router.post('/delete', accountController.destroyAccount);
+router.post('/delete', requireAuth, accountController.destroyAccount);
+
+//change nickname
+router.patch('/changeNickname', requireAuth, accountController.changeNickname);
 
 
 //Store account favourite

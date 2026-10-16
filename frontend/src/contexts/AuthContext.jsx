@@ -30,6 +30,8 @@ export function AuthProvider({ children }) {
     const logout = async () => {
         try {
             await api.post('/accounts/logout');
+        } catch (err) {
+            console.error('Logout fallito:', err.response?.status, err.response?.data);
         } finally {
             socket.disconnect();
             setUser(null);
@@ -37,7 +39,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, setUser }}>
             {children}
         </AuthContext.Provider>
     );
