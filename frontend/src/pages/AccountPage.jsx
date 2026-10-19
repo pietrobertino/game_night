@@ -11,6 +11,7 @@ export default function AccountPage() {
     const { logout, loading, user, setUser } = useAuth();
     const navigate = useNavigate();
     const [nickname, setNickname] = useState('');
+    const [firstNickname, setFirstNickname] = useState('');
     const [showNickMess, setShowNickMessage] = useState(false);
 
     //variabili per validare l'input del nickname
@@ -27,7 +28,11 @@ export default function AccountPage() {
 
     // quando user arriva (dopo /me), riempio il campo
     useEffect(() => {
-        if (user) setNickname(user.nickname ?? '');
+        if (user) {
+            setNickname(user.nickname ?? '');
+            setFirstNickname(user.nickname);
+        };
+
     }, [user]);
 
     // se /me ha risposto e non c'è nessun utente, torno alla pagina di accesso
@@ -90,9 +95,9 @@ export default function AccountPage() {
                     <>
                         <form onSubmit={handleForm}>
                             <label htmlFor="nickname">Nickname:</label>
-                            <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} onBlur={() => setNickTouched(true)} onClick={() => setRegErr(false)} />
+                            <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} onBlur={() => setNickTouched(true)} onClick={() => setNickTouched(false)} />
                             {showNickErr && <span>Nickname non valido</span>}
-                            <button disabled={lobbyCode !== '' || !nickValid}>Cambia nickname</button>
+                            <button disabled={lobbyCode !== '' || !nickValid || nickname === firstNickname} type='submit'>Cambia nickname</button>
                             {showNickMess && <span>Nickname aggiornato!</span>}
                         </form>
                         <button onClick={() => goToAccount('registration')}>Crea un account</button>

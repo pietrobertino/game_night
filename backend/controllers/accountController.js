@@ -229,18 +229,26 @@ const changeNickname = (req, res) => {
     //valido il nickname
     if (nickname.length <= 3 || nickname.length > 15) return res.status(400).json({ error: 'bad request', message: 'invalid nickname' });
 
+
     //verifico che l'utente non faccia parte di una lobby
 
-    db.query(`SELECT id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
+    db.query(`SELECT user_id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
         if (err) return res.status(500).json({ error: 'database error', message: err });
         if (results.length > 0) return res.status(409).json({ err: 'Conflict', message: 'Non puoi cambiare nickname mentre fai parte di una lobby' });
 
-        db.query(`UPDATE users SET nickname = ? WHERE id = ? `, [nickname, id], (err, result) => {
+        db.query(`SELECT * FROM users WHERE id = ?`, [id], (err, results) => {
             if (err) return res.status(500).json({ error: 'Internal database error' });
-            if (result.affectedRows === 0) return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+            if (results.length === 0) return res.status(404).json({ error: 'Not Found', message: 'User not found' });
 
-            res.json({ id: req.user.id, nickname, message: 'Nickname aggiornato' });
-        });
+            //verifico che il nickname non sia uguale a quello che stiamo inserendo
+            db.query(`UPDATE users SET nickname = ? WHERE id = ? AND nickname <> ? `, [nickname, id, nickname], (err, result) => {
+                if (err) return res.status(500).json({ error: 'Internal database error' });
+                if (result.affectedRows === 0) return res.status(409).json({ error: 'Conflict', message: 'Same nickname as the saved one' });
+
+                res.json({ id: req.user.id, nickname, message: 'Nickname aggiornato' });
+            });
+        })
+
     })
 }
 
