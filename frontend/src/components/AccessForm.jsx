@@ -81,9 +81,9 @@ export default function AccessForm() {
                     api.post(`/lobbys/${lobbyCode}/players`)
                         .then(res => {
                             console.log(res.data.message)
-                            //viene mandato alla pagina di accesso con la schermata di attesa
                         })
                         .catch(err => console.error(err.response?.data?.message))
+                    //viene mandato alla pagina di accesso con la schermata di attesa
                     setWaiting(true);
                     navigate('/');
                 } else {

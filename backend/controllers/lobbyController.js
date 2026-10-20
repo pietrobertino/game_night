@@ -29,8 +29,8 @@ const store = (req, res) => {
         if (adminResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Invalid Admin ID' })
 
         //l'admin esiste, quindi genero il codice univoco
-        generateUniqueCode((adminErr, lobbyCode) => {
-            if (adminErr) return res.status(500).json({ error: 'Internal database error' });
+        generateUniqueCode((codeErr, lobbyCode) => {
+            if (codeErr) return res.status(500).json({ error: 'Internal database error' });
 
             //inserisco i dati della lobby che ho creato nel database
             const insertSql = `INSERT INTO lobbys (lobby_code, admin_id) VALUES (?, ?);`;

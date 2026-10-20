@@ -195,7 +195,15 @@ const destroyAccount = (req, res) => {
 
 // React la chiama all'apertura del sito per sapere se c'è già una sessione valida
 const me = (req, res) => {
-    db.query(`SELECT id, nickname, account_type FROM users WHERE id = ?`, [req.user.id], (err, results) => {
+
+    const sql = `SELECT u.id, u.nickname, u.account_type, l.lobby_code, l.admin_id , lp.admission_status
+                FROM users u
+                LEFT JOIN lobby_players lp ON lp.user_id = u.id
+                LEFT JOIN lobbys l ON l.id = lp.lobby_id
+                WHERE u.id = ?
+                LIMIT 1`;
+
+    db.query(sql, [req.user.id], (err, results) => {
         if (err) return res.status(500).json({ error: 'Internal database error' });
 
         // il token è valido ma l'utente non esiste più (es. guest eliminato)

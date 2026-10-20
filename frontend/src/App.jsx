@@ -8,6 +8,7 @@ import Page404 from "./pages/Page404";
 import AccountPage from "./pages/AccountPage";
 import { GlobalContextProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { ApprovalContextProvider } from "./contexts/ApprovalContext";
 
 
 function App() {
@@ -16,19 +17,21 @@ function App() {
 
     <AuthProvider>
       <GlobalContextProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<AccessPage />} />
-            <Route path="/join/:lobbyCode" element={<AccessPage />} />
-            <Route element={<DefaultLayout />}>
-              <Route path="/home" element={<HomePage />} />
-              <Route path="/lobby" element={<LobbyPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/rules/:gameSlug" element={<PreGamePage />} />
-            </Route>
-            <Route path="*" element={<Page404 />} />
-          </Routes>
-        </BrowserRouter>
+        <ApprovalContextProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<AccessPage />} />
+              <Route path="/join/:lobbyCode" element={<AccessPage />} />
+              <Route element={<DefaultLayout />}>
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/lobby" element={<LobbyPage />} />
+                <Route path="/account" element={<AccountPage />} />
+                <Route path="/rules/:gameSlug" element={<PreGamePage />} />
+              </Route>
+              <Route path="*" element={<Page404 />} />
+            </Routes>
+          </BrowserRouter>
+        </ApprovalContextProvider>
       </GlobalContextProvider>
     </AuthProvider>
 

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Loader from "../components/Loader";
+import api from "../api";
 
 export default function AccessPage() {
 
@@ -28,7 +29,15 @@ export default function AccessPage() {
         // se l'utente è entrato tramite cookie (user non nullo)
         if (user) {
             // se è stato invitato resta qui in attesa di essere accettato
-            if (lobbyCode) setWaiting(true);
+            if (lobbyCode) {
+                setWaiting(true);
+                //invio la richiesta di accesso alla lobby
+                api.post(`/lobbys/${lobbyCode}/players`)
+                    .then(res => {
+                        console.log(res.data.message)
+                    })
+                    .catch(err => console.error(err.response?.data?.message))
+            }
             // altrimenti va direttamente alla home
             else navigate('/home');
         }
