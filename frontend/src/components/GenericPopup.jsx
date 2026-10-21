@@ -3,7 +3,7 @@ import { useGlobal } from "../contexts/GlobalContext";
 
 export default function GenericPopup() {
 
-    const { popup } = useGlobal();
+    const { popup, setPopup } = useGlobal();
 
     const [show, setShow] = useState(false);
 
@@ -12,6 +12,7 @@ export default function GenericPopup() {
         setShow(true);
         setTimeout(() => {
             setShow(false);
+            setPopup('');
         }, 3000);
     }, [popup])
 

@@ -11,9 +11,9 @@ export default function LobbyBanner() {
                     {
                         admin ?
 
-                            <h1>Host della lobby {lobbyCode}</h1 >
+                            <h4 className=" text-warning">Host della lobby {lobbyCode}</h4 >
                             :
-                            <h1>Membro della lobby {lobbyCode}</h1>
+                            <h4 className=" text-warning">Membro della lobby {lobbyCode}</h4>
                     }
 
                 </>

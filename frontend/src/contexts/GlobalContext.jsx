@@ -14,6 +14,9 @@ export function GlobalContextProvider({ children }) {
     const [lobbyCode, setLobbyCode] = useState('');
     const [currentGame, setCurrentGame] = useState('');
     const [popup, setPopup] = useState('');
+    const [AYSPopup, setAYSPopup] = useState({ show: false, message: '' });
+    const [showInvitePopup, setShowInvitePopup] = useState(false);
+
 
     useEffect(() => {
         if (user?.lobby_code) {
@@ -26,7 +29,7 @@ export function GlobalContextProvider({ children }) {
     }, [user]);
 
     return (
-        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode, currentGame, setCurrentGame, popup, setPopup }}>
+        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode, currentGame, setCurrentGame, popup, setPopup, AYSPopup, setAYSPopup, showInvitePopup, setShowInvitePopup }}>
             {children}
         </GlobalContext.Provider>
     )

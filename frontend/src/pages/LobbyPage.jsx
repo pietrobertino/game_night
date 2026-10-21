@@ -9,15 +9,18 @@ import WaitingList from "../components/WaitingList";
 import InviteButton from "../components/InviteButton";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
+import AreYouSurePopup from "../components/AreYouSurePopup";
 
 export default function LobbyPage() {
 
-    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup } = useGlobal();
+    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup } = useGlobal();
     const { loading } = useAuth();
 
     const [enterLobby, setEnterLobby] = useState(false);
     const [err, setErr] = useState('');
     const navigate = useNavigate();
+
+
 
 
     function createLobby() {
@@ -42,16 +45,28 @@ export default function LobbyPage() {
     }
 
     useEffect(() => {
+
+        const onRemoved = ({ userId }) => {
+            if (userId === currentUserId) {
+                setPopup('Sei stato rimosso dalla lobby');
+                setLobbyCode('');
+                navigate('/home');
+                return;
+            }
+        };
+
         const onDeleted = () => {
             setPopup('La lobby è stata eliminata');
-            setLobbyCode('');
             setAdmin(false);
+            setLobbyCode('');
             navigate('/home');
         };
 
+        socket.on('player_removed', onRemoved);
         socket.on('lobby_deleted', onDeleted);
 
         return () => {
+            socket.off('player_removed', onRemoved);
             socket.off('lobby_deleted', onDeleted);
         }
     }, [lobbyCode])
@@ -94,9 +109,15 @@ export default function LobbyPage() {
                                 }
                                 {
                                     admin ?
-                                        <button onClick={deleteLobby} className=" btn btn-danger">Elimina lobby</button>
+                                        <>
+                                            <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler eliminare la lobby? ' })} className=" btn btn-danger">Elimina lobby</button>
+                                            <AreYouSurePopup action={deleteLobby} />
+                                        </>
                                         :
-                                        <button className=" btn btn-danger" onClick={quitLobby}>Esci dalla lobby</button>
+                                        <>
+                                            <button className=" btn btn-danger" onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler abbandonare la lobby? ' })}>Esci dalla lobby</button>
+                                            <AreYouSurePopup action={quitLobby} />
+                                        </>
                                 }
                             </>
                             :

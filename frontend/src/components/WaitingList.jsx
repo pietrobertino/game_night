@@ -10,7 +10,7 @@ import { useApproval } from '../contexts/ApprovalContext';
 
 export default function WaitingList() {
 
-    const { lobbyCode, setLobbyCode, admin, setPopup } = useGlobal();
+    const { lobbyCode, setLobbyCode, admin, setPopup, showInvitePopup, setShowInvitePopup } = useGlobal();
     const { acceptPlayer, deletePlayer } = useApproval();
     const { user } = useAuth();
     const currentUserId = user.id;
@@ -39,13 +39,9 @@ export default function WaitingList() {
         // L'admin ha espulso un giocatore.
         // Cosa fare: se sono io, esco dalla pagina; altrimenti lo tolgo dalla lista
         const onRemoved = ({ userId }) => {
-            if (userId === currentUserId) {
-                setPopup('Sei stato rimosso dalla lobby');
-                setLobbyCode('');
-                navigate('/home');
-                return;
+            if (userId !== currentUserId) {
+                loadPlayers();
             }
-            loadPlayers();
         };
 
         socket.on('player_requested', onChange);
@@ -67,8 +63,8 @@ export default function WaitingList() {
             {waitingPlayers.map(player => (
                 <div key={player.userId} className=' d-flex gap-3'>
                     <LobbyListItem player={player} you={false} />
-                    <button className=' btn btn-success' onClick={() => acceptPlayer(player.userId)}> accetta</button>
-                    <button className=' btn btn-danger' onClick={() => deletePlayer(player.userId)} >rifiuta</button>
+                    <button className=' btn btn-success' onClick={() => { acceptPlayer(player.userId); setShowInvitePopup(false) }}> accetta</button>
+                    <button className=' btn btn-danger' onClick={() => { deletePlayer(player.userId); setShowInvitePopup(false) }} >rifiuta</button>
                 </div>
             ))}
         </ul>

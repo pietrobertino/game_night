@@ -2,7 +2,7 @@ import { useGlobal } from "../contexts/GlobalContext";
 
 export default function InviteButton() {
 
-    const { lobbyCode } = useGlobal();
+    const { lobbyCode, setPopup } = useGlobal();
 
     const handleShare = async () => {
         // Dati da condividere
@@ -22,7 +22,7 @@ export default function InviteButton() {
             }
         } else {
             // 2. Fallback per i browser che non la supportano (es. vecchi PC)
-            alert('La condivisione nativa non è supportata su questo browser.');
+            setPopup('La condivisione nativa non è supportata su questo browser.');
             // Qui potresti aprire un popup personalizzato o copiare il link negli appunti
         }
     };

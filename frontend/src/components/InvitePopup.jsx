@@ -5,21 +5,20 @@ import { useApproval } from "../contexts/ApprovalContext";
 
 export default function InvitePopup() {
 
-    const { admin } = useGlobal();
+    const { admin, showInvitePopup, setShowInvitePopup } = useGlobal();
     const { acceptPlayer, deletePlayer } = useApproval();
 
-    const [showPopup, setShowPopup] = useState(false);
     const [nickname, setNickname] = useState('');
     const [playerId, setPlayerId] = useState('');
 
     useEffect(() => {
 
         const onRequested = ({ userId, nickname }) => {
-            setShowPopup(true);
+            setShowInvitePopup(true);
             setNickname(nickname);
             setPlayerId(userId);
             setTimeout(() => {
-                setShowPopup(false);
+                setShowInvitePopup(false);
             }, 5000)
         };
 
@@ -34,12 +33,12 @@ export default function InvitePopup() {
 
     return (
         <>
-            {(admin && showPopup) &&
+            {(admin && showInvitePopup) &&
                 <>
                     <h3 className=" text-danger">{nickname} vorrebbe entrare nella lobby.</h3>
-                    <button className=" btn btn-primary" onClick={() => { acceptPlayer(playerId); setShowPopup(false) }}>Accetta</button>
-                    <button className=" btn btn-danger" onClick={() => { deletePlayer(playerId); setShowPopup(false) }}>Rifiuta</button>
-                    <button className=" btn btn-close" onClick={() => setShowPopup(false)}></button>
+                    <button className=" btn btn-primary" onClick={() => { acceptPlayer(playerId); setShowInvitePopup(false) }}>Accetta</button>
+                    <button className=" btn btn-danger" onClick={() => { deletePlayer(playerId); setShowInvitePopup(false) }}>Rifiuta</button>
+                    <button className=" btn btn-close" onClick={() => setShowInvitePopup(false)}></button>
                 </>
             }
         </>
