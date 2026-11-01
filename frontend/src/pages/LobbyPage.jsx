@@ -13,7 +13,7 @@ import AreYouSurePopup from "../components/AreYouSurePopup";
 
 export default function LobbyPage() {
 
-    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup } = useGlobal();
+    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup, waitingPlayers } = useGlobal();
     const { loading } = useAuth();
 
     const [enterLobby, setEnterLobby] = useState(false);
@@ -101,7 +101,7 @@ export default function LobbyPage() {
                                 <h4>Membri della lobby:</h4>
                                 <LobbyList />
                                 {
-                                    admin &&
+                                    (admin && waitingPlayers.length > 0) &&
                                     <>
                                         <h4>Giocatori in attesa:</h4>
                                         <WaitingList />
@@ -110,13 +110,11 @@ export default function LobbyPage() {
                                 {
                                     admin ?
                                         <>
-                                            <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler eliminare la lobby? ' })} className=" btn btn-danger">Elimina lobby</button>
-                                            <AreYouSurePopup action={deleteLobby} />
+                                            <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler eliminare la lobby? ', action: () => deleteLobby() })} className=" btn btn-danger">Elimina lobby</button>
                                         </>
                                         :
                                         <>
-                                            <button className=" btn btn-danger" onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler abbandonare la lobby? ' })}>Esci dalla lobby</button>
-                                            <AreYouSurePopup action={quitLobby} />
+                                            <button className=" btn btn-danger" onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler abbandonare la lobby? ', action: () => quitLobby() })}>Esci dalla lobby</button>
                                         </>
                                 }
                             </>

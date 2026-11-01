@@ -1,11 +1,16 @@
 import { Link, useParams } from "react-router-dom"
 import api from "../api";
 import { useEffect, useState } from "react";
+import { useGlobal } from "../contexts/GlobalContext";
 
 export default function PreGamePage() {
 
+    const { admin, lobbyCode } = useGlobal();
+
     const { gameSlug } = useParams();
     const [gameData, setGameData] = useState({});
+
+    const permitted = (admin && lobbyCode);
 
     useEffect(() => {
         api.get(`/games/${gameSlug}`)
@@ -13,14 +18,17 @@ export default function PreGamePage() {
             .catch(err => console.error(err))
     }, [])
 
-    //sulla base dei diritti del giocatore (host/guest) (per cui uso un context) decido cosa mostrare
+    //al click del pulsante (verificando che chi lo preme abbia i permessi) dovrei avvaire il gioco, spostare tutti i membri della lobby alla GamePage e mostrare le schermate corrette
 
     return (
         <>
             <h1>{gameData.title}</h1>
             <div>{gameData.description}</div>
             <div>Giocatori minimi: {gameData.min_players}</div>
-            <button><Link className=" text-decoration-none">Gioca</Link ></button>
+            <div className=" text-center">
+                <Link to={`/games/${gameSlug}`} className=" text-decoration-none text-black"><button className=" btn btn-secondary" disabled={!permitted}>Gioca</button></Link >
+                {!permitted && <div className=" text-warning">Puoi avviare il gioco solo se sei l'host di una lobby</div>}
+            </div>
         </>
     )
 }

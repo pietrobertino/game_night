@@ -9,6 +9,7 @@ import AccountPage from "./pages/AccountPage";
 import { GlobalContextProvider } from "./contexts/GlobalContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ApprovalContextProvider } from "./contexts/ApprovalContext";
+import GamePage from "./pages/GamePage";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
                 <Route path="/lobby" element={<LobbyPage />} />
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/rules/:gameSlug" element={<PreGamePage />} />
+                <Route path="/games/:gameSlug" element={<GamePage />} />
               </Route>
               <Route path="*" element={<Page404 />} />
             </Routes>

@@ -4,16 +4,15 @@ import { socket } from '../socket';
 import api from '../api';
 import { useGlobal } from '../contexts/GlobalContext';
 import { useAuth } from '../contexts/AuthContext';
-import Loader from './Loader';
 import LobbyListItem from './LobbyListItem';
-import GenericPopup from './GenericPopup';
 import { Trash } from 'react-bootstrap-icons'
+import { Award } from 'react-bootstrap-icons'
 import { useApproval } from '../contexts/ApprovalContext';
 
 // currentUserId: l'id dell'utente loggato (quello che ottieni dalla rotta /me)
-export default function LobbyList({ }) {
+export default function LobbyList() {
 
-    const { lobbyCode, setLobbyCode, admin, setPopup } = useGlobal();
+    const { lobbyCode, setLobbyCode, admin, setAdmin, setPopup, setAYSPopup } = useGlobal();
     const { deletePlayer } = useApproval();
     const { user } = useAuth();
     const currentUserId = user.id;
@@ -35,12 +34,25 @@ export default function LobbyList({ }) {
             })
     };
 
+    function makeAdmin(id) {
+        api.patch(`/lobbys/${lobbyCode}/players/${id}`)
+            .then(res => console.log(res.data))
+            .catch(err => console.error(err))
+    }
+
     useEffect(() => {
         // Lista iniziale: gli eventi socket gestiscono solo i cambiamenti successivi
         loadPlayers();
 
         //quando avviene uno degli eventi previsti del socket, aggiorno la lista dei giocatori con le nuove informazioni
         const onChange = () => loadPlayers();
+
+        //quando cambia l'admin devo verificare se sono io quello nuovo per aggiornare la UI
+        const onChangeAdmin = async ({ newAdminId, oldAdminId }) => {
+            if (newAdminId === currentUserId) await setAdmin(true);
+            if (oldAdminId === currentUserId) await setAdmin(false);
+            loadPlayers()
+        }
 
 
 
@@ -60,18 +72,21 @@ export default function LobbyList({ }) {
         socket.on('player_status_changed', onChange);
         socket.on('player_left', onChange);
         socket.on('player_removed', onRemoved);
+        socket.on('admin_changed', onChangeAdmin);
 
         // Pulizia: quando esci dalla pagina tolgo tutti gli ascolti
         return () => {
             socket.off('player_joined', onChange);
             socket.off('player_status_changed', onChange);
             socket.off('player_left', onChange);
+            socket.off('admin_changed', onChangeAdmin);
             socket.off('player_removed', onRemoved);
         };
     }, [lobbyCode, currentUserId]);
 
     return (
-        <ul>
+        <ul className='  list-unstyled'>
+            {/* mostro sempre in cima il listitem del giocatore che sta guardando il sito */}
             <LobbyListItem player={loggedPlayer} you={true} />
 
             {admin ?
@@ -79,7 +94,8 @@ export default function LobbyList({ }) {
                     {filteredPlayers.map(player => (
                         <div key={player.userId} className=' d-flex justify-content-between'>
                             <LobbyListItem player={player} you={false} />
-                            <button className=' btn btn-sm btn-danger' onClick={() => deletePlayer(player.userId)}><Trash /></button>
+                            <button className=' btn btn-sm btn-primary' onClick={() => setAYSPopup({ show: true, message: `Sei sicuro di voler rendere ${player.nickname} il nuovo admin della lobby?`, action: () => { makeAdmin(player.userId); setPopup(`${player.nickname} è il nuovo admin della lobby`) } })}><Award /></button>
+                            <button className=' btn btn-sm btn-danger' onClick={() => setAYSPopup({ show: true, message: `Vuoi davvero togliere il tuo bro ${player.nickname} dalla lobby?`, action: () => { deletePlayer(player.userId); setPopup(`${player.nickname} è stato cacciato dalla lobby`) } })}><Trash /></button>
                         </div>
 
                     ))}

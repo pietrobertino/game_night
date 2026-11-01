@@ -2,7 +2,11 @@ const jwt = require('jsonwebtoken');
 const db = require('../data/db').promise();
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// CONFIGURAZIONE ELIMINAZIONE ACCOUNT GUEST
+// ---------------------------------------------------------------
+// CONFIGURAZIONE
+// ---------------------------------------------------------------
+
+// ELIMINAZIONE ACCOUNT GUEST
 
 // Quanto aspettare dopo una disconnessione prima di eliminare il guest.
 const GUEST_DELETE_DELAY = 60 * 60 * 1000; // 60 minuti
@@ -10,12 +14,21 @@ const GUEST_DELETE_DELAY = 60 * 60 * 1000; // 60 minuti
 // Dopo quanto tempo di inattività un guest viene eliminato dalla pulizia periodica.
 const GUEST_MAX_INACTIVITY = '1 DAY'; // sintassi MySQL INTERVAL
 
-// Ogni quanto far girare la pulizia periodica.
+// ELIMINAZIONE LOBBY
+
+// Quanto aspettare dopo che l'admin si è disconnesso prima di eliminare la lobby.
+// Tienilo più basso di GUEST_DELETE_DELAY: se l'admin è un guest, la lobby deve sparire prima del suo account.
+const LOBBY_DELETE_DELAY = 30 * 60 * 1000; // 30 minuti
+
+// Dopo quanto tempo di assenza dell'admin una lobby viene eliminata dalla pulizia periodica.
+const LOBBY_ADMIN_MAX_ABSENCE = '2 HOUR'; // sintassi MySQL INTERVAL
+
+// Ogni quanto far girare la pulizia periodica (guest e lobby).
 const CLEANUP_INTERVAL = 3 * 60 * 60 * 1000; // 3 ore
 
-// Timer di eliminazione in attesa: userId -> timer.
-// Serve per poter annullare l'eliminazione se la persona torna.
-const deleteTimers = new Map();
+// Timer di eliminazione in attesa. Servono per poterli annullare se la persona torna.
+const deleteTimers = new Map(); // userId -> timer (guest)
+const lobbyTimers = new Map();  // lobbyId -> timer (lobby)
 
 // ---------------------------------------------------------------
 // FUNZIONI DI SUPPORTO
@@ -27,6 +40,17 @@ const isUserConnected = async (io, userId) => {
     const sockets = await io.in(`user_${userId}`).fetchSockets();
     return sockets.length > 0;
 };
+
+// Aggiorna la data dell'ultima attività dell'utente.
+const updateLastSeen = async (userId) => {
+    try {
+        await db.query(`UPDATE users SET last_seen = NOW() WHERE id = ?`, [userId]);
+    } catch (err) {
+        console.error('Errore aggiornamento last_seen:', err);
+    }
+};
+
+// --- GUEST ---
 
 // Elimina un account guest dal database.
 // Il controllo su account_type = 'guest' garantisce che gli utenti registrati
@@ -89,13 +113,70 @@ const cleanupInactiveGuests = async (io) => {
     }
 };
 
-// Aggiorna la data dell'ultima attività dell'utente.
-const updateLastSeen = async (userId) => {
+// --- LOBBY ---
+
+// Elimina una lobby dal database e avvisa chi è ancora nella stanza.
+// Le righe collegate (lobby_players, ecc.) vengono eliminate da ON DELETE CASCADE.
+const deleteLobby = async (io, lobbyId) => {
+    clearTimeout(lobbyTimers.get(lobbyId));
+    lobbyTimers.delete(lobbyId);
+
+    await db.query(`DELETE FROM lobbys WHERE id = ?`, [lobbyId]);
+
+    // Prima avviso (i socket sono ancora nella stanza), poi svuoto la stanza
+    io.to(`lobby_${lobbyId}`).emit('lobby_deleted');
+    io.in(`lobby_${lobbyId}`).socketsLeave(`lobby_${lobbyId}`);
+
+    console.log(`Lobby ${lobbyId} eliminata: admin assente`);
+};
+
+// Fa partire il timer di eliminazione per una lobby il cui admin si è disconnesso.
+const scheduleLobbyDeletion = (io, lobbyId, adminId) => {
+    // Se c'era già un timer per questa lobby, lo azzero per evitarne due
+    clearTimeout(lobbyTimers.get(lobbyId));
+
+    const timer = setTimeout(async () => {
+        lobbyTimers.delete(lobbyId);
+        try {
+            // Se nel frattempo l'admin è tornato (anche con un'altra scheda), non elimino
+            if (await isUserConnected(io, adminId)) return;
+
+            await deleteLobby(io, lobbyId);
+        } catch (err) {
+            console.error('Errore eliminazione lobby:', err);
+        }
+    }, LOBBY_DELETE_DELAY);
+
+    lobbyTimers.set(lobbyId, timer);
+};
+
+// Pulizia periodica: elimina le lobby il cui admin manca da troppo tempo.
+// Copre il caso in cui il server sia stato riavviato e i timer in memoria siano andati persi.
+const cleanupAbandonedLobbies = async (io) => {
     try {
-        await db.query(`UPDATE users SET last_seen = NOW() WHERE id = ?`, [userId]);
+        // COALESCE usa created_at se last_seen è ancora NULL
+        const [lobbies] = await db.query(
+            `SELECT l.id, l.admin_id FROM lobbys l
+             JOIN users u ON u.id = l.admin_id
+             WHERE COALESCE(u.last_seen, u.created_at) < NOW() - INTERVAL ${LOBBY_ADMIN_MAX_ABSENCE}`
+        );
+
+        for (const lobby of lobbies) {
+            // Salto le lobby il cui admin è connesso in questo momento
+            if (await isUserConnected(io, lobby.admin_id)) continue;
+
+            await deleteLobby(io, lobby.id);
+        }
     } catch (err) {
-        console.error('Errore aggiornamento last_seen:', err);
+        console.error('Errore nella pulizia delle lobby:', err);
     }
+};
+
+// Esegue le due pulizie. Prima le lobby, poi i guest:
+// un guest admin non si può eliminare finché la sua lobby esiste.
+const runCleanup = async (io) => {
+    await cleanupAbandonedLobbies(io);
+    await cleanupInactiveGuests(io);
 };
 
 // ---------------------------------------------------------------
@@ -104,10 +185,10 @@ const updateLastSeen = async (userId) => {
 
 const initGameSocket = (io) => {
 
-    // Pulizia periodica dei guest inattivi.
+    // Pulizia periodica di lobby abbandonate e guest inattivi.
     // Parte una volta all'avvio e poi ogni CLEANUP_INTERVAL.
-    cleanupInactiveGuests(io);
-    setInterval(() => cleanupInactiveGuests(io), CLEANUP_INTERVAL);
+    runCleanup(io);
+    setInterval(() => runCleanup(io), CLEANUP_INTERVAL);
 
     // Middleware di Socket.io per l'autenticazione tramite cookie HTTP-Only
     io.use((socket, next) => {
@@ -133,7 +214,7 @@ const initGameSocket = (io) => {
         const userId = socket.user.id;
         console.log(`Plugin Socket connesso per l'utente ID: ${userId}`);
 
-        // La persona è tornata: annullo l'eventuale eliminazione in attesa
+        // La persona è tornata: annullo l'eventuale eliminazione del guest in attesa
         clearTimeout(deleteTimers.get(userId));
         deleteTimers.delete(userId);
 
@@ -143,10 +224,13 @@ const initGameSocket = (io) => {
         // Segno che l'utente è attivo adesso
         await updateLastSeen(userId);
 
-        // LOGICA DI RICONNESSIONE POST-CRASH
+        // LOGICA DI RICONNESSIONE POST-CRASH / REFRESH
         try {
             const [players] = await db.query(
-                `SELECT lobby_id, nickname FROM lobby_players WHERE user_id = ?`,
+                `SELECT lp.lobby_id, lp.nickname, l.admin_id
+                 FROM lobby_players lp
+                 JOIN lobbys l ON l.id = lp.lobby_id
+                 WHERE lp.user_id = ?`,
                 [userId]
             );
 
@@ -155,6 +239,12 @@ const initGameSocket = (io) => {
                 const lobbyId = activeLobby.lobby_id;
 
                 socket.join(`lobby_${lobbyId}`);
+
+                // L'admin è tornato: annullo l'eventuale eliminazione della lobby
+                if (activeLobby.admin_id === userId) {
+                    clearTimeout(lobbyTimers.get(lobbyId));
+                    lobbyTimers.delete(lobbyId);
+                }
 
                 await db.query(
                     `UPDATE lobby_players SET connection_status = 'ONLINE' WHERE lobby_id = ? AND user_id = ?`,
@@ -177,7 +267,10 @@ const initGameSocket = (io) => {
             console.log(`Socket disconnesso per l'utente ID: ${userId}`);
             try {
                 const [players] = await db.query(
-                    `SELECT lobby_id FROM lobby_players WHERE user_id = ?`,
+                    `SELECT lp.lobby_id, l.admin_id
+                     FROM lobby_players lp
+                     JOIN lobbys l ON l.id = lp.lobby_id
+                     WHERE lp.user_id = ?`,
                     [userId]
                 );
 
@@ -193,12 +286,17 @@ const initGameSocket = (io) => {
                         userId: userId,
                         status: 'OFFLINE'
                     });
+
+                    // Se era l'admin e non ha altre schede aperte, parte il timer di eliminazione della lobby
+                    if (players[0].admin_id === userId && !(await isUserConnected(io, userId))) {
+                        scheduleLobbyDeletion(io, lobbyId, userId);
+                    }
                 }
             } catch (err) {
                 console.error("Errore nella disconnessione del socket:", err);
             }
 
-            // Registro l'ultima attività e faccio partire il timer di eliminazione
+            // Registro l'ultima attività e faccio partire il timer di eliminazione del guest
             // (se l'account non è guest, deleteGuest non farà nulla)
             await updateLastSeen(userId);
             scheduleGuestDeletion(io, userId);

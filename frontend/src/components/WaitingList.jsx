@@ -1,26 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { socket } from '../socket';
 import api from '../api';
 import { useGlobal } from '../contexts/GlobalContext';
 import { useAuth } from '../contexts/AuthContext';
-import Loader from './Loader';
 import LobbyListItem from './LobbyListItem';
 import { useApproval } from '../contexts/ApprovalContext';
 
 export default function WaitingList() {
 
-    const { lobbyCode, setLobbyCode, admin, setPopup, showInvitePopup, setShowInvitePopup } = useGlobal();
+    const { lobbyCode, setShowInvitePopup, waitingPlayers, setWaitingPlayers } = useGlobal();
     const { acceptPlayer, deletePlayer } = useApproval();
     const { user } = useAuth();
     const currentUserId = user.id;
 
-
-    // lista dei giocatori in attesa
-    const [waitingPlayers, setWaitingPlayers] = useState([]);
-
-
-    const navigate = useNavigate();
 
     // Carica la lista dei giocatori dal server (chiamata HTTP normale)
     const loadPlayers = () => {
