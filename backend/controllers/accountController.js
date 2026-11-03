@@ -50,14 +50,36 @@ const accessAccount = (req, res) => {
         const match = await bcrypt.compare(password, results[0].password_hash);
 
         if (match) {
-            //setto il token del cookie con l'id dell'utente
-            setSessionCookie(res, results[0].id);
-            return res.status(200).json({
-                access: true,
-                id: results[0].id,
-                nickname: results[0].nickname,
-                account_type: results[0].account_type,
-                message: 'Accesso riuscito'
+
+            //ottengo i dati di una possibile lobby a cui era connesso e i suoi preferiti
+            const lobbySql = `SELECT l.lobby_code, l.admin_id , lp.admission_status
+            FROM users u
+            LEFT JOIN lobby_players lp ON lp.user_id = u.id
+            LEFT JOIN lobbys l ON l.id = lp.lobby_id
+            WHERE u.id = ?
+            LIMIT 1`;
+
+            db.query(lobbySql, [results[0].id], (err, lobbyRes) => {
+                if (err) return res.status(500).json({ error: 'Internal database error' });
+
+                //ottengo anche i giochi preferiti dell'utente
+                db.query(`SELECT g.game_slug FROM user_favourites uf JOIN games g ON uf.game_id = g.id WHERE user_id = ?`, [results[0].id], (err, gameRes) => {
+                    if (err) return res.status(500).json({ error: 'Internal database error' });
+
+                    //setto il token del cookie con l'id dell'utente
+                    setSessionCookie(res, results[0].id);
+                    return res.status(200).json({
+                        user: {
+                            id: results[0].id,
+                            nickname: results[0].nickname,
+                            account_type: results[0].account_type,
+                            ...lobbyRes[0]
+                        },
+                        favs: gameRes.map(game => game.game_slug)
+
+                    });
+                })
+
             });
         } else return res.status(401).json({ access: false, message: "Wrong password" });
 
@@ -112,10 +134,12 @@ const store = (req, res) => {
                 //setto il token del cookie con l'id appena inserito
                 setSessionCookie(res, results.insertId);
                 res.status(201).json({
-                    id: results.insertId,
-                    nickname,
-                    account_type: accountType,
-                    message: 'Account inserito correttamente'
+                    user: {
+                        id: results.insertId,
+                        nickname,
+                        account_type: accountType
+                    },
+                    favs: []
                 });
             })
         })
@@ -138,8 +162,7 @@ const store = (req, res) => {
             res.status(201).json({
                 id: results.insertId,
                 nickname,
-                account_type: accountType,
-                message: 'Guest inserito correttamente'
+                account_type: accountType
             });
         })
     }
@@ -209,7 +232,12 @@ const me = (req, res) => {
         // il token è valido ma l'utente non esiste più (es. guest eliminato)
         if (results.length === 0) return res.status(401).json({ error: 'Unauthorized' });
 
-        res.json(results[0]);
+        //ottengo anche i giochi preferiti dell'utente
+        db.query(`SELECT g.game_slug FROM user_favourites uf JOIN games g ON uf.game_id = g.id WHERE user_id = ?`, [req.user.id], (err, gameRes) => {
+            if (err) return res.status(500).json({ error: 'Internal database error' });
+            res.json({ user: results[0], favs: gameRes.map(game => game.game_slug) });
+        })
+
     });
 };
 
@@ -260,17 +288,5 @@ const changeNickname = (req, res) => {
     })
 }
 
-const storeFavourite = (req, res) => {
 
-    const { mail, gameId } = req.params;
-
-    res.send(`Aggiungo il gioco ${gameId} (se esiste) ai preferiti dell'account con mail ${mail}, se esiste `)
-}
-
-const destroyFavourite = (req, res) => {
-
-    const { mail, gameId } = req.params;
-
-    res.send(`Elimino il gioco ${gameId} dai preferiti (se questo esiste ed è presente) dell'account con mail ${mail}, se questo esiste`);
-}
-module.exports = { accessAccount, store, destroyAccount, storeFavourite, destroyFavourite, me, logout, changeNickname };
+module.exports = { accessAccount, store, destroyAccount, me, logout, changeNickname };

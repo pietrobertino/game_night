@@ -7,7 +7,7 @@ import api from '../api';
 
 export default function AccountPage() {
 
-    const { accessType, setAccessType, lobbyCode } = useGlobal();
+    const { accessType, setAccessType, lobbyCode, setAYSPopup } = useGlobal();
     const { logout, loading, user, setUser } = useAuth();
     const navigate = useNavigate();
     const [nickname, setNickname] = useState('');
@@ -112,13 +112,14 @@ export default function AccountPage() {
                             <button disabled={lobbyCode !== ''}>Cambia nickname</button>
                             {showNickMess && <span>Nickname aggiornato!</span>}
                         </form>
-                        <button onClick={() => goToAccount('guest')} disabled={lobbyCode !== ''}>Esci dall'account</button>
+                        <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler uscire dal tuo account?', action: () => goToAccount('guest') })} disabled={lobbyCode !== ''}>Esci dall'account</button>
                         <button onClick={() => setShowPassInput(true)} disabled={lobbyCode !== ''}>Elimina account</button>
                         {showMessage &&
                             <h5 className=' text-danger'>Account eliminato, adesso verrai reindirizzato alla pagina di accesso</h5>
                         }
                         {showPassInput &&
                             <form onSubmit={eliminateAccount}>
+                                <h5>Per eliminare l'account inserisci qui la tua password</h5>
                                 <label htmlFor="password">Password:</label>
                                 <input type={showPassword ? 'text' : 'password'} id="password" name="password" value={password} onChange={e => setPassword(e.target.value)} onClick={() => setPassErr(false)} />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'nascondi password' : 'mostra password'}</button>

@@ -3,6 +3,7 @@ const games = require('../games');
 
 const index = (req, res) => {
 
+
     const sql =
         `SELECT
          id,
@@ -55,6 +56,78 @@ const show = (req, res) => {
     })
 }
 
+const indexFavourites = (req, res) => {
+
+    const userId = req.user.id;
+    const sql = `SELECT 
+         g.id,
+         g.game_slug,
+         g.title,
+         g.game_image,
+         g.game_background,
+         g.min_players
+         FROM games g 
+         JOIN user_favourites uf ON g.id = uf.game_id
+         WHERE uf.user_id = ?`
+    //prendo tutti i suoi preferiti
+    db.query(sql, [userId], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Internal Database error' });
+        res.json(results);
+    })
+}
+
+
+const storeFavourite = (req, res) => {
+
+    const { gameSlug } = req.params;
+    const userId = req.user.id;
+
+    //verifico che l'utente abbia un account
+    db.query(`SELECT account_type FROM users WHERE id = ?`, [userId], (err, userRes) => {
+        if (err) return res.status(500).json({ message: 'Internal Database error' });
+        if (userRes.length === 0) return res.status(404).json({ error: 'Not Found', message: 'User not in database' });
+        if (userRes[0].account_type !== 'registration') return res.status(403).json({ error: 'Forbidden', message: 'Devi avere un account per aggiungere un preferito' });
+        //controllo che lo slug corrisponda ad un gioco esistente
+        db.query(`SELECT id FROM games WHERE game_slug = ?`, [gameSlug], (err, gameRes) => {
+            if (err) return res.status(500).json({ message: 'Internal Database error' });
+            if (gameRes.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Game not in database' });
+            //controllo che non sia già nei preferiti dell'utente
+            db.query(`SELECT * FROM user_favourites WHERE game_id = ? AND user_id = ?`, [gameRes[0].id, userId], (err, results) => {
+                if (err) return res.status(500).json({ message: 'Internal Database error' });
+                if (results.length !== 0) return res.status(409).json({ error: 'Conflict', message: 'Game already in favourites' });
+                //lo aggiungo ai preferiti dell'utente
+                db.query(`INSERT INTO user_favourites (game_id, user_id) VALUES (?,?)`, [gameRes[0].id, userId], (err, finalRes) => {
+                    if (err) return res.status(500).json({ message: 'Internal Database error' });
+                    res.status(201).json({ message: 'Gioco aggiunto ai preferiti' });
+                })
+
+            })
+
+        })
+    })
+
+}
+
+const destroyFavourite = (req, res) => {
+
+    const { gameSlug } = req.params;
+    const userId = req.user.id;
+
+
+    //controllo che lo slug corrisponda ad un gioco esistente
+    db.query(`SELECT id FROM games WHERE game_slug = ?`, [gameSlug], (err, gameRes) => {
+        if (err) return res.status(500).json({ message: 'Internal Database error' });
+        if (gameRes.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Game not in database' });
+        //lo rimuovo dai preferiti se lo trovo
+        db.query(`DELETE FROM user_favourites WHERE game_id = ? AND user_id = ?`, [gameRes[0].id, userId], (err, results) => {
+            if (err) return res.status(500).json({ message: 'Internal Database error' });
+            if (results.affectedRows === 0) return res.status(404).json({ error: 'Not Found', message: 'Game not in favourites' });
+            res.status(204).json({ message: 'Gioco rimosso dai preferiti' });
+        })
+
+    })
+
+}
 
 const startGame = (req, res) => {
 
@@ -110,4 +183,4 @@ const startGame = (req, res) => {
     });
 };
 
-module.exports = { index, show, startGame };
+module.exports = { index, indexFavourites, show, storeFavourite, destroyFavourite, startGame };

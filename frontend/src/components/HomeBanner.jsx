@@ -5,7 +5,7 @@ import { useGlobal } from "../contexts/GlobalContext";
 
 export default function HomeBanner() {
 
-    const { setPopup } = useGlobal();
+    const { setPopup, setShowFavs, showFavs } = useGlobal();
     const { user } = useAuth();
 
     return (
@@ -14,10 +14,10 @@ export default function HomeBanner() {
             <div className="alert alert-success alert-dismissible fade show m-0 shadow d-flex justify-content-between align-items-center rounded-pill" style={{ maxWidth: '500px', width: '90%' }}>
                 <button className="btn"><Search /></button>
                 {
-                    user.account_type === 'guest' ?
+                    user?.account_type === 'guest' ?
                         <Link className=" text-decoration-none text-black" to={`/account`} onClick={() => { setPopup('Per usare la funzione dei preferiti devi crare un account brother') }}><Star /></Link>
                         :
-                        <button className=" btn"><Star /></button>
+                        <button className=" btn" onClick={() => setShowFavs(!showFavs)}><Star /></button>
                 }
                 <Link className=" text-decoration-none text-black" to={`/account`} ><Person /></Link>
             </div>

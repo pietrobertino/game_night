@@ -73,7 +73,7 @@ export default function AccessForm() {
             .then(response => {
                 console.log(response.data);
                 // salvo l'utente e collego il socket (il cookie ora esiste)
-                login({ id: response.data.id, nickname: response.data.nickname, account_type: response.data.account_type });
+                login(response.data);
 
                 //se l'utente è stato invitato ad una lobby (non sta accedendo direttamente al sito)
                 if (invited) {

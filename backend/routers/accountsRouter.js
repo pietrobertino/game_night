@@ -22,11 +22,6 @@ router.post('/delete', requireAuth, accountController.destroyAccount);
 router.patch('/changeNickname', requireAuth, accountController.changeNickname);
 
 
-//Store account favourite
-router.post('/:mail/favourites/:gameId', accountController.storeFavourite);
-
-//Delete account favourite
-router.delete('/:mail/favourites/:gameId', accountController.destroyFavourite);
 
 
 
