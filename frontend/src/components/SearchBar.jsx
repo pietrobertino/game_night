@@ -1,11 +1,18 @@
+import { useSearch } from "../contexts/SearchContext";
+
 export default function SearchBar() {
 
-    //gestisco la ricerca tramite backend con api call, index game sulla base delle parole digitate
-
-    //vorrei fare in modo che fosse ad ogni tasto digitato, no però essendo da mobile se faccio cosi diventa un disastro, meglio ricerca al premere del pulsante
-
+    const { showSearch, setShowSearch, search, setSearch } = useSearch();
 
     return (
-        <></>
+        <>
+            {
+                showSearch &&
+                <div className=" d-flex ">
+                    <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Impostore..." className=" form-check" />
+                    <button className=" btn-close" onClick={() => { setShowSearch(false), setSearch('') }}></button>
+                </div>
+            }
+        </>
     )
 }

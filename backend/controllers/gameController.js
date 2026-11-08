@@ -3,22 +3,42 @@ const games = require('../games');
 
 const index = (req, res) => {
 
+    const { search } = req.query;
+    const showFavs = req.query.favourites === 'true';
 
-    const sql =
+    const userId = req.user.id;
+
+    const queryParams = [];
+
+    let sql =
         `SELECT
-         id,
-         game_slug,
-         title,
-         game_image,
-         game_background,
-         min_players
-         FROM games;`;
+         g.id,
+         g.game_slug,
+         g.title,
+         g.game_image,
+         g.game_background,
+         g.min_players
+         FROM games g`;
 
-    db.query(sql, (err, results) => {
+    //se la ricerca chiede solo i preferiti allora la restringo a quelli
+    if (showFavs) {
+        sql += ` JOIN user_favourites uf ON g.id = uf.game_id
+         WHERE uf.user_id = ?`;
+        queryParams.push(userId);
+    }
+
+    //se è stata effettuata una ricerca aggiorno la query
+    if (search && search.trim() !== "") {
+        showFavs ? sql += ` AND g.title LIKE ?` : sql += ` WHERE g.title LIKE ?`;
+        queryParams.push(`%${search}%`);
+    }
+
+    db.query(sql, queryParams, (err, results) => {
 
         if (err) return res.status(500).json({
             error: true,
-            message: 'Database error'
+            message: 'Database error',
+            text: err
         });
 
         res.json(results);
@@ -26,6 +46,7 @@ const index = (req, res) => {
     })
 
 }
+
 
 const show = (req, res) => {
 
@@ -56,25 +77,6 @@ const show = (req, res) => {
     })
 }
 
-const indexFavourites = (req, res) => {
-
-    const userId = req.user.id;
-    const sql = `SELECT 
-         g.id,
-         g.game_slug,
-         g.title,
-         g.game_image,
-         g.game_background,
-         g.min_players
-         FROM games g 
-         JOIN user_favourites uf ON g.id = uf.game_id
-         WHERE uf.user_id = ?`
-    //prendo tutti i suoi preferiti
-    db.query(sql, [userId], (err, results) => {
-        if (err) return res.status(500).json({ message: 'Internal Database error' });
-        res.json(results);
-    })
-}
 
 
 const storeFavourite = (req, res) => {
@@ -183,4 +185,4 @@ const startGame = (req, res) => {
     });
 };
 
-module.exports = { index, indexFavourites, show, storeFavourite, destroyFavourite, startGame };
+module.exports = { index, show, storeFavourite, destroyFavourite, startGame };

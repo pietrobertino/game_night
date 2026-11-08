@@ -5,10 +5,7 @@ const requireAuth = require('../middlewares/requireAuth');
 
 
 // index
-router.get('/', gameController.index);
-
-//index favourites
-router.get(`/favourites`, requireAuth, gameController.indexFavourites);
+router.get('/', requireAuth, gameController.index);
 
 // show
 router.get('/:slug', gameController.show);

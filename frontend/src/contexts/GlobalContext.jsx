@@ -18,7 +18,6 @@ export function GlobalContextProvider({ children }) {
     const [showInvitePopup, setShowInvitePopup] = useState(false);
     // lista dei giocatori in attesa
     const [waitingPlayers, setWaitingPlayers] = useState([]);
-    const [showFavs, setShowFavs] = useState(false);
 
 
     useEffect(() => {
@@ -32,7 +31,7 @@ export function GlobalContextProvider({ children }) {
     }, [user]);
 
     return (
-        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode, currentGame, setCurrentGame, popup, setPopup, AYSPopup, setAYSPopup, showInvitePopup, setShowInvitePopup, waitingPlayers, setWaitingPlayers, showFavs, setShowFavs }}>
+        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode, currentGame, setCurrentGame, popup, setPopup, AYSPopup, setAYSPopup, showInvitePopup, setShowInvitePopup, waitingPlayers, setWaitingPlayers }}>
             {children}
         </GlobalContext.Provider>
     )
