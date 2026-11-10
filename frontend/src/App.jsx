@@ -20,8 +20,8 @@ function App() {
     <AuthProvider>
       <GlobalContextProvider>
         <ApprovalContextProvider>
-          <SearchContextProvider>
-            <BrowserRouter>
+          <BrowserRouter>
+            <SearchContextProvider>
               <Routes>
                 <Route path="/" element={<AccessPage />} />
                 <Route path="/join/:lobbyCode" element={<AccessPage />} />
@@ -34,8 +34,8 @@ function App() {
                 </Route>
                 <Route path="*" element={<Page404 />} />
               </Routes>
-            </BrowserRouter>
-          </SearchContextProvider>
+            </SearchContextProvider>
+          </BrowserRouter>
         </ApprovalContextProvider>
       </GlobalContextProvider>
     </AuthProvider>

@@ -8,13 +8,14 @@ import AreYouSurePopup from "../components/AreYouSurePopup"
 
 export default function DefaultLayout() {
 
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (loading) return;
         //se l'utente non ha effettuato nessun tipo di accesso, lo rimando alla pagina di accesso
         if (!user) navigate('/');
-    }, [])
+    }, [loading])
 
     return (
         <>

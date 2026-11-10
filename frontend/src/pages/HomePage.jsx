@@ -10,18 +10,10 @@ import Loader from '../components/Loader'
 export default function HomePage() {
 
     const [games, setGames] = useState([]);
-    const [debouncedSearch, setDebouncedSearch] = useState('');
 
-    const { search, showFavs } = useSearch();
+    const { debouncedSearch, showFavs } = useSearch();
 
-    //attivo il debounce per la ricerca (così non faccio una chiamat ad ogni carattere, ma solo quando l'utente smette di scrivere)
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 400);
 
-        return () => clearTimeout(timer); // Pulisce il timeout se l'utente digita ancora
-    }, [search]);
 
     // Chiamata API con protezione contro le race condition 
     useEffect(() => {
@@ -60,10 +52,10 @@ export default function HomePage() {
                 ?
                 <>
                     {
-                        (!showFavs && !search) ?
+                        (!showFavs && !debouncedSearch) ?
                             <Loader />
                             :
-                            <h4 className=" text-center text-danger">{search ? "Nessun risultato trovato" : "Non hai giochi preferiti"}</h4>
+                            <h4 className=" text-center text-danger">{debouncedSearch ? "Nessun risultato trovato" : "Non hai giochi preferiti"}</h4>
                     }
                 </>
                 :

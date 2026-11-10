@@ -9,11 +9,12 @@ import WaitingList from "../components/WaitingList";
 import InviteButton from "../components/InviteButton";
 import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
-import AreYouSurePopup from "../components/AreYouSurePopup";
+import { QrCode } from "react-bootstrap-icons";
+import QRCodePopup from "../components/QRCodePopup";
 
 export default function LobbyPage() {
 
-    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup, waitingPlayers } = useGlobal();
+    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup, waitingPlayers, showQR, setShowQR } = useGlobal();
     const { loading } = useAuth();
 
     const [enterLobby, setEnterLobby] = useState(false);
@@ -74,6 +75,7 @@ export default function LobbyPage() {
     return (
         <>
             <h1>Lobby Page</h1>
+            <QRCodePopup />
             {loading ?
                 <Loader />
                 :
@@ -92,6 +94,7 @@ export default function LobbyPage() {
                             <>
                                 <div className=" d-flex justify-content-between">
                                     <h3>Codice lobby: {lobbyCode}</h3>
+                                    <button className=" btn btn-primary" onClick={() => setShowQR(true)}><QrCode /></button>
                                     <InviteButton />
                                 </div>
                                 {
