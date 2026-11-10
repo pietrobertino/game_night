@@ -180,7 +180,7 @@ const destroyAccount = (req, res) => {
 
     //verifico come prima cosa che l'utente non faccia parte di una lobby
 
-    db.query(`SELECT id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
+    db.query(`SELECT lobby_id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
         if (err) return res.status(500).json({ error: 'database error', message: err });
         if (results.length > 0) return res.status(409).json({ err: 'Conflict', message: 'Non puoi eliminare un account mentre fai parte di una lobby' });
 
@@ -248,7 +248,7 @@ const logout = (req, res) => {
 
     //verifico come prima cosa che l'utente non faccia parte di una lobby
 
-    db.query(`SELECT id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
+    db.query(`SELECT lobby_id FROM lobby_players WHERE user_id = ?`, [id], (err, results) => {
         if (err) return res.status(500).json({ error: 'database error', message: err });
         if (results.length > 0) return res.status(409).json({ err: 'Conflict', message: 'Non puoi uscire dall account mentre fai parte di una lobby' });
 

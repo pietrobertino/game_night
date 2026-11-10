@@ -25,14 +25,16 @@ export function AuthProvider({ children }) {
 
     // Da chiamare dopo registrazione, login o guest
     const login = (userData) => {
-        if (userData.user.account_type === 'registration') {
-            setUser(userData.user);
-            setFavs(userData.favs);
-        } else {
-            setUser(userData);
-            setFavs([]);
+        const userObj = userData.user || userData;
+        const favsObj = userData.favs || [];
+
+        setUser(userObj);
+        setFavs(favsObj);
+
+        // Assicuriamoci che il socket sia connesso
+        if (!socket.connected) {
+            socket.connect();
         }
-        socket.connect();
     };
 
     const logout = async () => {

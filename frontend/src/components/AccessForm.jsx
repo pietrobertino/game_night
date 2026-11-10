@@ -10,6 +10,8 @@ export default function AccessForm() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const initialData = { email: '', password: '' }
     const [nickname, setNickname] = useState('');
     const [formData, setFormData] = useState(initialData);
@@ -43,7 +45,8 @@ export default function AccessForm() {
 
     function handleForm(e) {
         e.preventDefault();
-        let notValid;
+        if (isLoading) return;
+        let notValid = false;
         let url;
         let data;
 
@@ -68,7 +71,18 @@ export default function AccessForm() {
                 break;
         }
 
-        if (notValid) return;
+        // Se non è valido, blocchiamo tutto subito (senza attivare isLoading)
+        if (notValid) {
+            setNickTouched(true);
+            setEmailTouched(true);
+            setPassTouched(true);
+            return;
+        }
+
+        // Se è valido, attiviamo il caricamento e partiamo con la chiamata
+        setIsLoading(true);
+
+
         api.post(url, data)
             .then(response => {
                 console.log(response.data);
@@ -95,7 +109,10 @@ export default function AccessForm() {
                 console.error(err.response?.data?.message);
                 if (accessType === 'login') setLoginErr(true);
                 else if (accessType === 'registration') setRegErr(true);
-            });
+            })
+            .finally(() => {
+                setIsLoading(false);
+            })
     }
 
     return (
@@ -120,13 +137,13 @@ export default function AccessForm() {
                     {showPassErr && <span>Password non valida</span>}
                 </>
             }
-            <button type="submit" disabled={((accessType === 'guest' || accessType === 'registration') && !nickValid) || ((accessType === 'login' || accessType === 'registration') && (!emailValid || !passValid))}>
+            <button type="submit" disabled={isLoading || ((accessType === 'guest' || accessType === 'registration') && !nickValid) || ((accessType === 'login' || accessType === 'registration') && (!emailValid || !passValid))} >
                 {accessType === 'guest' && 'Entra come guest'}
                 {accessType === 'login' && 'Accedi'}
                 {accessType === 'registration' && 'Registrati'}
             </button>
             {loginErr && <span className=" text-danger">Email e/o Password errata</span>}
             {regErr && <span className=" text-danger">Esiste già un account registrato con questo indirizzo email</span>}
-        </form>
+        </form >
     )
 }
