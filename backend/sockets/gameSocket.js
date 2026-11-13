@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const db = require('../data/db').promise();
+const db = require('../data/db');
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // ---------------------------------------------------------------
@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const GUEST_DELETE_DELAY = 60 * 60 * 1000; // 60 minuti
 
 // Dopo quanto tempo di inattività un guest viene eliminato dalla pulizia periodica.
-const GUEST_MAX_INACTIVITY = '1 DAY'; // sintassi MySQL INTERVAL
+const GUEST_MAX_INACTIVITY = '1 DAY'; // sintassi INTERVAL
 
 // ELIMINAZIONE LOBBY
 
@@ -21,7 +21,7 @@ const GUEST_MAX_INACTIVITY = '1 DAY'; // sintassi MySQL INTERVAL
 const LOBBY_DELETE_DELAY = 30 * 60 * 1000; // 30 minuti
 
 // Dopo quanto tempo di assenza dell'admin una lobby viene eliminata dalla pulizia periodica.
-const LOBBY_ADMIN_MAX_ABSENCE = '2 HOUR'; // sintassi MySQL INTERVAL
+const LOBBY_ADMIN_MAX_ABSENCE = '2 HOUR'; // sintassi INTERVAL
 
 // Ogni quanto far girare la pulizia periodica (guest e lobby).
 const CLEANUP_INTERVAL = 3 * 60 * 60 * 1000; // 3 ore
@@ -44,7 +44,7 @@ const isUserConnected = async (io, userId) => {
 // Aggiorna la data dell'ultima attività dell'utente.
 const updateLastSeen = async (userId) => {
     try {
-        await db.query(`UPDATE users SET last_seen = NOW() WHERE id = ?`, [userId]);
+        await db.query(`UPDATE users SET last_seen = NOW() WHERE id = $1`, [userId]);
     } catch (err) {
         console.error('Errore aggiornamento last_seen:', err);
     }
@@ -56,16 +56,16 @@ const updateLastSeen = async (userId) => {
 // Il controllo su account_type = 'guest' garantisce che gli utenti registrati
 // non vengano mai toccati, nemmeno per errore.
 const deleteGuest = async (userId) => {
-    const [rows] = await db.query(
-        `SELECT id FROM users WHERE id = ? AND account_type = 'guest'`,
+    const { rows } = await db.query(
+        `SELECT id FROM users WHERE id = $1 AND account_type = 'guest'`,
         [userId]
     );
     if (rows.length === 0) return;
 
     // Prima elimino le righe collegate, altrimenti la chiave esterna blocca il DELETE.
     // (Se lobby_players ha già ON DELETE CASCADE, questa riga si può togliere.)
-    await db.query(`DELETE FROM lobby_players WHERE user_id = ?`, [userId]);
-    await db.query(`DELETE FROM users WHERE id = ?`, [userId]);
+    await db.query(`DELETE FROM lobby_players WHERE user_id = $1`, [userId]);
+    await db.query(`DELETE FROM users WHERE id = $1`, [userId]);
 
     console.log(`Account guest ${userId} eliminato`);
 };
@@ -96,10 +96,10 @@ const cleanupInactiveGuests = async (io) => {
     try {
         // COALESCE usa created_at se last_seen è ancora NULL
         // (guest creato ma mai collegato via socket)
-        const [guests] = await db.query(
+        const { rows: guests } = await db.query(
             `SELECT id FROM users
              WHERE account_type = 'guest'
-             AND COALESCE(last_seen, created_at) < NOW() - INTERVAL ${GUEST_MAX_INACTIVITY}`
+             AND COALESCE(last_seen, created_at) < NOW() - INTERVAL '1 DAY'`
         );
 
         for (const guest of guests) {
@@ -121,7 +121,7 @@ const deleteLobby = async (io, lobbyId) => {
     clearTimeout(lobbyTimers.get(lobbyId));
     lobbyTimers.delete(lobbyId);
 
-    await db.query(`DELETE FROM lobbys WHERE id = ?`, [lobbyId]);
+    await db.query(`DELETE FROM lobbys WHERE id = $1`, [lobbyId]);
 
     // Prima avviso (i socket sono ancora nella stanza), poi svuoto la stanza
     io.to(`lobby_${lobbyId}`).emit('lobby_deleted');
@@ -155,10 +155,10 @@ const scheduleLobbyDeletion = (io, lobbyId, adminId) => {
 const cleanupAbandonedLobbies = async (io) => {
     try {
         // COALESCE usa created_at se last_seen è ancora NULL
-        const [lobbies] = await db.query(
+        const { rows: lobbies } = await db.query(
             `SELECT l.id, l.admin_id FROM lobbys l
              JOIN users u ON u.id = l.admin_id
-             WHERE COALESCE(u.last_seen, u.created_at) < NOW() - INTERVAL ${LOBBY_ADMIN_MAX_ABSENCE}`
+             WHERE COALESCE(u.last_seen, u.created_at) < NOW() - INTERVAL '2 HOUR'`
         );
 
         for (const lobby of lobbies) {
@@ -226,11 +226,11 @@ const initGameSocket = (io) => {
 
         // LOGICA DI RICONNESSIONE POST-CRASH / REFRESH
         try {
-            const [players] = await db.query(
+            const { rows: players } = await db.query(
                 `SELECT lp.lobby_id, lp.nickname, l.admin_id
                  FROM lobby_players lp
                  JOIN lobbys l ON l.id = lp.lobby_id
-                 WHERE lp.user_id = ?`,
+                 WHERE lp.user_id = $1`,
                 [userId]
             );
 
@@ -247,7 +247,7 @@ const initGameSocket = (io) => {
                 }
 
                 await db.query(
-                    `UPDATE lobby_players SET connection_status = 'ONLINE' WHERE lobby_id = ? AND user_id = ?`,
+                    `UPDATE lobby_players SET connection_status = 'ONLINE' WHERE lobby_id = $1 AND user_id = $2`,
                     [lobbyId, userId]
                 );
 
@@ -266,11 +266,11 @@ const initGameSocket = (io) => {
         socket.on('disconnect', async () => {
             console.log(`Socket disconnesso per l'utente ID: ${userId}`);
             try {
-                const [players] = await db.query(
+                const { rows: players } = await db.query(
                     `SELECT lp.lobby_id, l.admin_id
                      FROM lobby_players lp
                      JOIN lobbys l ON l.id = lp.lobby_id
-                     WHERE lp.user_id = ?`,
+                     WHERE lp.user_id = $1`,
                     [userId]
                 );
 
@@ -278,7 +278,7 @@ const initGameSocket = (io) => {
                     const lobbyId = players[0].lobby_id;
 
                     await db.query(
-                        `UPDATE lobby_players SET connection_status = 'OFFLINE' WHERE lobby_id = ? AND user_id = ?`,
+                        `UPDATE lobby_players SET connection_status = 'OFFLINE' WHERE lobby_id = $1 AND user_id = $2`,
                         [lobbyId, userId]
                     );
 
