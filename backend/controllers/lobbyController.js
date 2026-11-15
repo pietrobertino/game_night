@@ -12,9 +12,9 @@ const store = (req, res) => {
             lobbyCode += chars[Math.floor(Math.random() * chars.length)];
         }
         //verifico che il codice della lobby non sia già in uso
-        db.query('SELECT lobby_code FROM lobbys WHERE lobby_code = ?', [lobbyCode], (err, results) => {
+        db.query('SELECT lobby_code FROM lobbys WHERE lobby_code = $1', [lobbyCode], (err, result) => {
             if (err) return callback(err);
-            if (results.length > 0) return generateUniqueCode(callback); // duplicato: riprovo
+            if (result.rows.length > 0) return generateUniqueCode(callback); // duplicato: riprovo
             callback(null, lobbyCode); // codice libero
         });
     }
@@ -23,37 +23,47 @@ const store = (req, res) => {
 
 
     //verifico che l'id dell'admin sia veramente associato ad un account presente nel db
-    const adminSql = `SELECT id, nickname FROM users WHERE id = ?`;
+    const adminSql = `SELECT id, nickname FROM users WHERE id = $1`;
     db.query(adminSql, [adminId], (adminErr, adminResults) => {
         if (adminErr) return res.status(500).json({ error: 'Internal database error' });
-        if (adminResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Invalid Admin ID' })
+        if (adminResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Invalid Admin ID' });
 
-        //l'admin esiste, quindi genero il codice univoco
-        generateUniqueCode((adminErr, lobbyCode) => {
-            if (adminErr) return res.status(500).json({ error: 'Internal database error' });
+        //verifico che l'admin non sia già membro di una lobby
+        db.query(`SELECT * FROM lobby_players WHERE user_id = $1`, [adminId], (err, presentResult) => {
+            if (err) return res.status(500).json({ error: 'Internal database error' });
+            if (presentResult.rows.length > 0) return res.status(409).json({ error: 'Conflict', message: 'The admin is already in a lobby' });
 
-            //inserisco i dati della lobby che ho creato nel database
-            const insertSql = `INSERT INTO lobbys (lobby_code, admin_id) VALUES (?, ?);`;
-            db.query(insertSql, [lobbyCode, adminId], (lobbyInsertErr, lobbyInsertResults) => {
-                if (lobbyInsertErr) return res.status(500).json({ error: 'Internal database error' });
 
-                //inserisco i dati della lobby e dell'admin in lobby_players
-                const sql = `INSERT INTO lobby_players (lobby_id, user_id, nickname, player_role, admission_status ) VALUES (?,?,?,?,?)`;
-                db.query(sql, [lobbyInsertResults.insertId, adminId, adminResults[0].nickname, 'admin', 'admitted'], (err, results) => {
-                    if (err) return res.status(500).json({ error: 'Internal database error' });
+            //l'admin esiste e non è in una lobby, quindi genero il codice univoco
+            generateUniqueCode((codeErr, lobbyCode) => {
+                if (codeErr) return res.status(500).json({ error: 'Internal database error' });
 
-                    //inserisco il socket dell'admin nel gruppo di socket della lobby
-                    const io = req.app.get('io');
-                    io.in(`user_${adminId}`).socketsJoin(`lobby_${lobbyInsertResults.insertId}`);
+                //inserisco i dati della lobby che ho creato nel database (usiamo RETURNING id)
+                const insertSql = `INSERT INTO lobbys (lobby_code, admin_id) VALUES ($1, $2) RETURNING id;`;
+                db.query(insertSql, [lobbyCode, adminId], (lobbyInsertErr, lobbyInsertResults) => {
+                    if (lobbyInsertErr) return res.status(500).json({ error: 'Internal database error' });
 
-                    res.status(201).json({
-                        lobby_id: lobbyInsertResults.insertId,
-                        lobby_code: lobbyCode,
-                        message: 'Lobby creata correttamente'
+                    const lobbyId = lobbyInsertResults.rows[0].id;
+
+                    //inserisco i dati della lobby e dell'admin in lobby_players
+                    const sql = `INSERT INTO lobby_players (lobby_id, user_id, nickname, player_role, admission_status ) VALUES ($1, $2, $3, $4, $5)`;
+                    db.query(sql, [lobbyId, adminId, adminResults.rows[0].nickname, 'admin', 'admitted'], (err) => {
+                        if (err) return res.status(500).json({ error: 'Internal database error' });
+
+                        //inserisco il socket dell'admin nel gruppo di socket della lobby
+                        const io = req.app.get('io');
+                        io.in(`user_${adminId}`).socketsJoin(`lobby_${lobbyId}`);
+
+                        res.status(201).json({
+                            lobby_id: lobbyId,
+                            lobby_code: lobbyCode,
+                            message: 'Lobby creata correttamente'
+                        });
                     });
                 });
             });
-        });
+        })
+
     });
 }
 
@@ -61,11 +71,11 @@ const show = (req, res) => {
 
     const { lobbyCode } = req.params;
 
-    const showSql = `SELECT * FROM lobbys WHERE lobby_code = ?`;
-    db.query(showSql, [lobbyCode], (err, results) => {
+    const showSql = `SELECT * FROM lobbys WHERE lobby_code = $1`;
+    db.query(showSql, [lobbyCode], (err, result) => {
         if (err) return res.status(500).json({ error: 'Internal database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'Not Found', message: `no existing lobby with code ${lobbyCode}` });
-        res.status(200).json(results[0]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: `no existing lobby with code ${lobbyCode}` });
+        res.status(200).json(result.rows[0]);
     })
 
 }
@@ -75,33 +85,44 @@ const destroy = (req, res) => {
     const { lobbyCode } = req.params;
     const userId = req.user.id;
 
-
-    //cerco lobby ed admin
-    const lobbySql = `SELECT id, admin_id FROM lobbys WHERE lobby_code = ?`;
-    db.query(lobbySql, [lobbyCode], (err, results) => {
+    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = $1`, [lobbyCode], (err, result) => {
         if (err) return res.status(500).json({ error: 'Internal database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
 
-        const lobby = results[0];
+        const lobby = result.rows[0];
 
-        // verifico che l'user sia l'admin della lobby
         if (lobby.admin_id !== userId) {
             return res.status(403).json({ error: 'Forbidden', message: 'Solo l\'admin può eliminare la lobby' });
         }
 
-        // elimino la lobby (tutto ciò che è collegato viene eliminato automaticamente da on delete cascade)
-        db.query(`DELETE FROM lobbys WHERE id = ?`, [lobby.id], (err) => {
-            if (err) return res.status(500).json({ error: 'Internal database error' });
+        // 1. prima di eliminare, salvo chi è ancora in attesa
+        db.query(
+            `SELECT user_id FROM lobby_players WHERE lobby_id = $1 AND admission_status = 'pending'`,
+            [lobby.id],
+            (err, pendingResult) => {
+                if (err) return res.status(500).json({ error: 'Internal database error' });
 
-            const io = req.app.get('io');
-            io.to(`lobby_${lobby.id}`).emit('lobby_deleted');
-            io.in(`lobby_${lobby.id}`).socketsLeave(`lobby_${lobby.id}`);
+                const pendingIds = pendingResult.rows.map(row => row.user_id);
 
-            res.json({ message: 'Lobby eliminata correttamente' });
-        });
+                // 2. elimino la lobby (il cascade elimina anche i giocatori)
+                db.query(`DELETE FROM lobbys WHERE id = $1`, [lobby.id], (err) => {
+                    if (err) return res.status(500).json({ error: 'Internal database error' });
 
+                    const io = req.app.get('io');
+
+                    // 3. avviso i membri ammessi (sono nella stanza della lobby)
+                    io.to(`lobby_${lobby.id}`).emit('lobby_deleted');
+                    io.in(`lobby_${lobby.id}`).socketsLeave(`lobby_${lobby.id}`);
+
+                    // 4. avviso anche chi era in attesa, tramite la sua stanza personale
+                    pendingIds.forEach(id => io.to(`user_${id}`).emit('lobby_deleted'));
+
+                    res.json({ message: 'Lobby eliminata correttamente' });
+                });
+            }
+        );
     });
-}
+};
 
 const storeWaitingPlayer = (req, res) => {
 
@@ -109,33 +130,35 @@ const storeWaitingPlayer = (req, res) => {
     const userId = req.user.id;
 
     //verifico che il giocatore sia nel database e ne prendo il nickname e l'id
-    const playerSql = `SELECT id, nickname FROM users WHERE id = ?`;
+    const playerSql = `SELECT id, nickname FROM users WHERE id = $1`;
     db.query(playerSql, [userId], (playerErr, playerResults) => {
         if (playerErr) return res.status(500).json({ error: 'Internal database error' });
-        if (playerResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+        if (playerResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'User not found' });
 
         //se il giocatore è presente, verifico che la lobby sia presente
-        const lobbySql = `SELECT id FROM lobbys WHERE lobby_code = ? `;
+        const lobbySql = `SELECT id FROM lobbys WHERE lobby_code = $1 `;
         db.query(lobbySql, [lobbyCode], (lobbyErr, lobbyResults) => {
             if (lobbyErr) return res.status(500).json({ error: 'Internal database error' });
-            if (lobbyResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+            if (lobbyResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+
+            const lobbyId = lobbyResults.rows[0].id;
 
             //se anche la lobby è presente, verifico che il giocatore non sia già presente nella lobby
-            const playerLobbySql = `SELECT * FROM lobby_players WHERE lobby_id = ? AND user_id = ?`;
-            db.query(playerLobbySql, [lobbyResults[0].id, userId], (playerLobbyErr, playerLobbyResults) => {
+            const playerLobbySql = `SELECT * FROM lobby_players WHERE lobby_id = $1 AND user_id = $2`;
+            db.query(playerLobbySql, [lobbyId, userId], (playerLobbyErr, playerLobbyResults) => {
                 if (playerLobbyErr) return res.status(500).json({ error: 'Internal database error' });
-                if (playerLobbyResults.length > 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in lobby' });
+                if (playerLobbyResults.rows.length > 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in lobby' });
 
                 //verificato che l'utente non è già presente il lobby, lo aggiungo come giocatore in attesa (defalut)
-                const insertSql = `INSERT INTO lobby_players (lobby_id, user_id, nickname) VALUES (?,?,?)`;
-                db.query(insertSql, [lobbyResults[0].id, userId, playerResults[0].nickname], (err, results) => {
+                const insertSql = `INSERT INTO lobby_players (lobby_id, user_id, nickname) VALUES ($1, $2, $3)`;
+                db.query(insertSql, [lobbyId, userId, playerResults.rows[0].nickname], (err) => {
                     if (err) return res.status(500).json({ error: 'Internal database error' });
 
                     //avviso l'admin della richiesta
                     const io = req.app.get('io');
-                    io.to(`lobby_${lobbyResults[0].id}`).emit('player_requested', {
+                    io.to(`lobby_${lobbyId}`).emit('player_requested', {
                         userId,
-                        nickname: playerResults[0].nickname
+                        nickname: playerResults.rows[0].nickname
                     });
 
                     res.status(201).json({
@@ -152,34 +175,38 @@ const acceptWaitingPlayer = (req, res) => {
     const userId = req.user.id;
 
     //ottengo l'id della lobby e verifico che esista
-    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = ?`, [lobbyCode], (lobbyErr, lobbyResults) => {
+    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = $1`, [lobbyCode], (lobbyErr, lobbyResults) => {
         if (lobbyErr) return res.status(500).json({ error: 'Internal database error' });
-        if (lobbyResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+        if (lobbyResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+
+        const lobby = lobbyResults.rows[0];
 
         //verifico che l'user sia l'admin della lobby
-        if (lobbyResults[0].admin_id !== userId) {
+        if (lobby.admin_id !== userId) {
             return res.status(403).json({ error: 'Forbidden', message: 'Solo l\'admin può accettare giocatori nella lobby' });
         }
 
         //Cerco il player all'interno della lobby, verifico che non sia già stato ammesso, e lo ammetto
-        const searchSql = `SELECT * FROM lobby_players WHERE lobby_id = ? AND user_id = ?;`;
-        db.query(searchSql, [lobbyResults[0].id, playerId], (playerErr, playerResults) => {
+        const searchSql = `SELECT * FROM lobby_players WHERE lobby_id = $1 AND user_id = $2;`;
+        db.query(searchSql, [lobby.id, playerId], (playerErr, playerResults) => {
             if (playerErr) return res.status(500).json({ error: 'Internal database error' });
-            if (playerResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
+            if (playerResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
+
+            const player = playerResults.rows[0];
 
             //se ho trovato il player, cambio la sua richiesta da pending a admitted 
-            db.query(`UPDATE lobby_players SET admission_status = 'admitted' WHERE lobby_id = ? AND user_id = ? AND admission_status = 'pending';`, [lobbyResults[0].id, playerId], (admissionErr, admissionResults) => {
+            db.query(`UPDATE lobby_players SET admission_status = 'admitted' WHERE lobby_id = $1 AND user_id = $2 AND admission_status = 'pending';`, [lobby.id, playerId], (admissionErr, admissionResults) => {
                 if (admissionErr) return res.status(500).json({ error: 'Internal database error' });
-                if (admissionResults.affectedRows === 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in lobby' });
+                if (admissionResults.rowCount === 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in lobby or not pending' });
 
                 //aggiungo il socket al gruppo di socket della lobby
                 const io = req.app.get('io');
-                io.in(`user_${playerId}`).socketsJoin(`lobby_${lobbyResults[0].id}`);
+                io.in(`user_${playerId}`).socketsJoin(`lobby_${lobby.id}`);
 
                 //avviso gli altri giocatori
-                io.to(`lobby_${lobbyResults[0].id}`).emit('player_joined', {
+                io.to(`lobby_${lobby.id}`).emit('player_joined', {
                     userId: Number(playerId),
-                    nickname: playerResults[0].nickname
+                    nickname: player.nickname
                 });
 
                 res.status(201).json({
@@ -196,20 +223,14 @@ const indexPlayers = (req, res) => {
     const { lobbyCode } = req.params;
 
     //Cerco tutti i giocatori della lobby, se essa esiste
-    const sql = `SELECT lp.user_id AS userId, lp.nickname, lp.player_role, lp.admission_status, lp.connection_status FROM lobbys l JOIN lobby_players lp ON lp.lobby_id = l.id WHERE l.lobby_code = ?;`
-    db.query(sql, [lobbyCode], (err, results) => {
+    const sql = `SELECT lp.user_id AS "userId", lp.nickname, lp.player_role, lp.admission_status, lp.connection_status FROM lobbys l JOIN lobby_players lp ON lp.lobby_id = l.id WHERE l.lobby_code = $1;`
+    db.query(sql, [lobbyCode], (err, result) => {
         if (err) return res.status(500).json({ error: 'Internal database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby Not Found' });
-        res.json(results);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby Not Found' });
+        res.json(result.rows);
     })
 }
 
-const showPlayer = (req, res) => {
-
-    const { lobbyId, playerId } = req.params;
-
-    res.send(`Dati del giocatore id:${playerId} della lobby id:${lobbyId}, se entrambi esistono`);
-}
 
 const destroyPlayer = (req, res) => {
 
@@ -218,26 +239,28 @@ const destroyPlayer = (req, res) => {
 
 
     //ottengo l'id della lobby e verifico che esista
-    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = ?`, [lobbyCode], (lobbyErr, lobbyResults) => {
+    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = $1`, [lobbyCode], (lobbyErr, lobbyResults) => {
         if (lobbyErr) return res.status(500).json({ error: 'Internal database error' });
-        if (lobbyResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+        if (lobbyResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+
+        const lobby = lobbyResults.rows[0];
 
         //verifico che l'user sia l'admin della lobby
-        if (lobbyResults[0].admin_id !== userId) {
+        if (lobby.admin_id !== userId) {
             return res.status(403).json({ error: 'Forbidden', message: 'Solo l\'admin può eliminare giocatori dalla lobby' });
         }
 
         //Elimino il giocatore dalla lobby se presente, altrimenti segnalo di non averlo trovato
-        const searchSql = `DELETE FROM lobby_players WHERE lobby_id = ? AND user_id = ?;`;
-        db.query(searchSql, [lobbyResults[0].id, playerId], (err, results) => {
+        const searchSql = `DELETE FROM lobby_players WHERE lobby_id = $1 AND user_id = $2 RETURNING nickname;`;
+        db.query(searchSql, [lobby.id, playerId], (err, result) => {
             if (err) return res.status(500).json({ error: 'Internal database error' });
-            if (results.affectedRows === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
+            if (result.rowCount === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
 
             const io = req.app.get('io');
             const targetId = Number(playerId);
 
-            io.to(`lobby_${lobbyResults[0].id}`).emit('player_removed', { userId: targetId });
-            io.in(`user_${targetId}`).socketsLeave(`lobby_${lobbyResults[0].id}`);
+            io.to(`lobby_${lobby.id}`).except(`user_${targetId}`).emit('player_removed', { userId: targetId, userNickname: result.rows[0].nickname }); //informo la lobby
+            io.to(`user_${targetId}`).emit('player_removed', { userId: targetId, userNickname: result.rows[0].nickname }); //informo l'user 
 
             res.status(201).json({
                 message: 'Giocatore eliminato dalla lobby'
@@ -252,21 +275,22 @@ const leaveLobby = (req, res) => {
     const userId = req.user.id;
 
     //Verifico l'esistenza della lobby e ne prendo l'id
-    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = ?`, [lobbyCode], (lobbyErr, lobbyResults) => {
+    db.query(`SELECT id, admin_id FROM lobbys WHERE lobby_code = $1`, [lobbyCode], (lobbyErr, lobbyResults) => {
         if (lobbyErr) return res.status(500).json({ error: 'Internal database error' });
-        if (lobbyResults.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+        if (lobbyResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
 
+        const lobbyId = lobbyResults.rows[0].id;
 
         //Elimino il giocatore dalla lobby se presente, altrimenti segnalo di non averlo trovato
-        const searchSql = `DELETE FROM lobby_players WHERE lobby_id = ? AND user_id = ?;`;
-        db.query(searchSql, [lobbyResults[0].id, userId], (err, results) => {
+        const searchSql = `DELETE FROM lobby_players WHERE lobby_id = $1 AND user_id = $2 RETURNING nickname;`;
+        db.query(searchSql, [lobbyId, userId], (err, result) => {
             if (err) return res.status(500).json({ error: 'Internal database error' });
-            if (results.affectedRows === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
+            if (result.rowCount === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not found' });
 
             const io = req.app.get('io');
 
-            io.in(`user_${userId}`).socketsLeave(`lobby_${lobbyResults[0].id}`);
-            io.to(`lobby_${lobbyResults[0].id}`).emit('player_left', { userId });
+            io.in(`user_${userId}`).socketsLeave(`lobby_${lobbyId}`);
+            io.to(`lobby_${lobbyId}`).emit('player_left', { userNickname: result.rows[0].nickname });
 
             res.status(201).json({
                 message: 'Giocatore eliminato dalla lobby'
@@ -278,9 +302,54 @@ const leaveLobby = (req, res) => {
 
 const modifyAdmin = (req, res) => {
 
-    const { lobbyId, playerId } = req.params;
+    const { lobbyCode, playerId } = req.params;
 
-    res.send(`L'admin della lobby ${lobbyId} (se questa esiste) diventa il giocatore ${playerId}, se questo esiste, fa parte della lobby e non è già l'admin`)
+    const userId = req.user.id;
+
+    //verifico che la lobby esista
+    db.query(`SELECT admin_id, id FROM lobbys WHERE lobby_code = $1`, [lobbyCode], (err, lobbyResults) => {
+        if (err) return res.status(500).json({ error: 'Internal database error' });
+        if (lobbyResults.rows.length === 0) return res.status(404).json({ error: 'Not Found', message: 'Lobby not found' });
+
+        const lobby = lobbyResults.rows[0];
+
+        //se esiste verifico che l'user che fa la richiesta ne sia l'admin
+        if (lobby.admin_id !== userId) return res.status(403).json({ error: 'Forbidden', message: 'Solo l\'admin può modificare l\'admin dalla lobby' });
+
+        //se è così rendo il giocatore selezionato l'admin se questo esiste (cambio l'id dell'admin associato alla lobby e il player_role di entrambi gli user)
+        db.query(`UPDATE lobby_players SET player_role = 'admin' WHERE lobby_id = $1 AND user_id = $2 RETURNING nickname`, [lobby.id, playerId], (err, changeRoleRes) => {
+            if (err) return res.status(500).json({ error: 'Internal database error' });
+            if (changeRoleRes.rowCount === 0) return res.status(404).json({ error: 'Not Found', message: 'Player not in lobby' });
+
+            db.query(`UPDATE lobby_players SET player_role = 'player' WHERE lobby_id = $1 AND user_id = $2`, [lobby.id, userId], (err, changeRoleRes2) => {
+                if (err) return res.status(500).json({ error: 'Internal database error' });
+                if (changeRoleRes2.rowCount === 0) return res.status(404).json({ error: 'Not Found', message: 'Admin not in lobby' });
+
+                db.query(`UPDATE lobbys SET admin_id = $1 WHERE lobby_code = $2`, [playerId, lobbyCode], (err) => {
+                    if (err) return res.status(500).json({ error: 'Internal database error' });
+
+                    //mando a tutti i giocatori un avviso tramite socket
+                    const io = req.app.get('io');
+
+                    io.to(`lobby_${lobby.id}`).emit('admin_changed', {
+                        newAdminId: Number(playerId),
+                        oldAdminId: userId,
+                        newAdminNickname: changeRoleRes.rows[0].nickname
+                    });
+
+                    res.status(201).json({
+                        message: 'Admin modificato correttamente'
+                    });
+                })
+
+            })
+        })
+
+
+    })
+
+
+
 }
 
-module.exports = { store, show, destroy, indexPlayers, destroyPlayer, showPlayer, storeWaitingPlayer, acceptWaitingPlayer, modifyAdmin, leaveLobby };
+module.exports = { store, show, destroy, indexPlayers, destroyPlayer, storeWaitingPlayer, acceptWaitingPlayer, modifyAdmin, leaveLobby };

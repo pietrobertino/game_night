@@ -28,12 +28,7 @@ router.delete('/:lobbyCode/players/:playerId', requireAuth, lobbyController.dest
 router.delete('/:lobbyCode/players', requireAuth, lobbyController.leaveLobby);
 
 
-
-//Show player from lobby
-router.get('/:lobbyId/players/:playerId', lobbyController.showPlayer);
-
-
 //Modify Lobby admin
-router.patch('/:lobbyId/players/:playerId', lobbyController.modifyAdmin);
+router.patch('/:lobbyCode/players/:playerId', requireAuth, lobbyController.modifyAdmin);
 
 module.exports = router;

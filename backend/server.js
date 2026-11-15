@@ -21,14 +21,14 @@ app.use(express.static('public'));
 
 //Configurazione CORS per l'app
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://game-night-sage-nine.vercel.app/",
     credentials: true
 }));
 
 // Configurazione Socket.io
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "https://game-night-sage-nine.vercel.app/",
         credentials: true
     }
 });

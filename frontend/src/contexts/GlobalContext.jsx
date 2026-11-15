@@ -1,17 +1,23 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
 
 export function GlobalContextProvider({ children }) {
 
+
     const [accessType, setAccessType] = useState('guest');
     const [invited, setInvited] = useState(false);
-    const [waiting, setWaiting] = useState(false);
-    const [admin, setAdmin] = useState(false);
-    const [lobbyCode, setLobbyCode] = useState('');
+
+    const [popup, setPopup] = useState('');
+    const [AYSPopup, setAYSPopup] = useState({ show: false, message: '', action: () => { } });
+    const [showInvitePopup, setShowInvitePopup] = useState(false);
+
+
+
+
 
     return (
-        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, waiting, setWaiting, admin, setAdmin, lobbyCode, setLobbyCode }}>
+        <GlobalContext.Provider value={{ accessType, setAccessType, invited, setInvited, popup, setPopup, AYSPopup, setAYSPopup, showInvitePopup, setShowInvitePopup }}>
             {children}
         </GlobalContext.Provider>
     )

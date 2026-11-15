@@ -3,12 +3,17 @@ import api from "../api";
 import { useGlobal } from "../contexts/GlobalContext"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function AccessForm() {
 
-    const { invited, setWaiting, accessType, lobbyCode } = useGlobal();
-    const { login } = useAuth();
+    const { invited, accessType } = useGlobal();
+    const { lobbyCode } = useLobby();
+    const { login, setWaiting } = useAuth();
+
     const navigate = useNavigate();
+
+    const [isLoading, setIsLoading] = useState(false);
 
     const initialData = { email: '', password: '' }
     const [nickname, setNickname] = useState('');
@@ -43,7 +48,8 @@ export default function AccessForm() {
 
     function handleForm(e) {
         e.preventDefault();
-        let notValid;
+        if (isLoading) return;
+        let notValid = false;
         let url;
         let data;
 
@@ -68,12 +74,23 @@ export default function AccessForm() {
                 break;
         }
 
-        if (notValid) return;
+        // Se non è valido, blocchiamo tutto subito (senza attivare isLoading)
+        if (notValid) {
+            setNickTouched(true);
+            setEmailTouched(true);
+            setPassTouched(true);
+            return;
+        }
+
+        // Se è valido, attiviamo il caricamento e partiamo con la chiamata
+        setIsLoading(true);
+
+
         api.post(url, data)
             .then(response => {
                 console.log(response.data);
                 // salvo l'utente e collego il socket (il cookie ora esiste)
-                login({ id: response.data.id, nickname: response.data.nickname, account_type: response.data.account_type });
+                login(response.data);
 
                 //se l'utente è stato invitato ad una lobby (non sta accedendo direttamente al sito)
                 if (invited) {
@@ -81,9 +98,9 @@ export default function AccessForm() {
                     api.post(`/lobbys/${lobbyCode}/players`)
                         .then(res => {
                             console.log(res.data.message)
-                            //viene mandato alla pagina di accesso con la schermata di attesa
                         })
                         .catch(err => console.error(err.response?.data?.message))
+                    //viene mandato alla pagina di accesso con la schermata di attesa
                     setWaiting(true);
                     navigate('/');
                 } else {
@@ -95,7 +112,10 @@ export default function AccessForm() {
                 console.error(err.response?.data?.message);
                 if (accessType === 'login') setLoginErr(true);
                 else if (accessType === 'registration') setRegErr(true);
-            });
+            })
+            .finally(() => {
+                setIsLoading(false);
+            })
     }
 
     return (
@@ -120,13 +140,13 @@ export default function AccessForm() {
                     {showPassErr && <span>Password non valida</span>}
                 </>
             }
-            <button type="submit" disabled={((accessType === 'guest' || accessType === 'registration') && !nickValid) || ((accessType === 'login' || accessType === 'registration') && (!emailValid || !passValid))}>
+            <button type="submit" disabled={isLoading || ((accessType === 'guest' || accessType === 'registration') && !nickValid) || ((accessType === 'login' || accessType === 'registration') && (!emailValid || !passValid))} >
                 {accessType === 'guest' && 'Entra come guest'}
                 {accessType === 'login' && 'Accedi'}
                 {accessType === 'registration' && 'Registrati'}
             </button>
             {loginErr && <span className=" text-danger">Email e/o Password errata</span>}
             {regErr && <span className=" text-danger">Esiste già un account registrato con questo indirizzo email</span>}
-        </form>
+        </form >
     )
 }
