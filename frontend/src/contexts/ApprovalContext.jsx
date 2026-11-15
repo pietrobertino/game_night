@@ -1,13 +1,13 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext } from "react";
 import api from "../api";
-import { useGlobal } from "./GlobalContext";
+import { useLobby } from "./LobbyContext";
 
 const ApprovalContext = createContext();
 
 
 export function ApprovalContextProvider({ children }) {
 
-    const { lobbyCode } = useGlobal();
+    const { lobbyCode } = useLobby();
 
     function acceptPlayer(playerId) {
         console.log(lobbyCode, playerId)

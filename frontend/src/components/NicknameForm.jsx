@@ -1,11 +1,9 @@
-import { useGlobal } from '../contexts/GlobalContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import api from '../api';
 
 export default function NicknameForm() {
 
-    const { accessType } = useGlobal();
     const { user, setUser } = useAuth();
 
     const [nickname, setNickname] = useState('');

@@ -1,8 +1,8 @@
-import { useGlobal } from "../contexts/GlobalContext"
+import { useLobby } from "../contexts/LobbyContext"
 
 export default function LobbyBanner() {
 
-    const { lobbyCode, admin } = useGlobal();
+    const { lobbyCode, admin } = useLobby();
 
     return (
         <>

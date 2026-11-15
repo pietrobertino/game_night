@@ -1,9 +1,9 @@
-import { useGlobal } from "../contexts/GlobalContext";
 import { QRCodeSVG } from "qrcode.react";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function QRCodePopup() {
 
-    const { showQR, setShowQR, lobbyCode } = useGlobal();
+    const { showQR, setShowQR, lobbyCode } = useLobby();
     const url = `https://localhost:5173/join/${lobbyCode}`;
 
     return (

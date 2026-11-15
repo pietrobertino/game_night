@@ -35,7 +35,7 @@ export default function Gamecard({ game }) {
                     :
 
                     <>
-                        {user.account_type === 'guest' ?
+                        {user?.account_type === 'guest' ?
                             <button className=" btn" onClick={() => { setPopup('Per aggiungere ai preferiti devi creare un account') }}><Star /></button>
                             :
                             <button className=" btn" onClick={() => addToFavs(game.game_slug)}><Star /></button>
