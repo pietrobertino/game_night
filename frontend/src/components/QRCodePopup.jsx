@@ -4,7 +4,7 @@ import { useLobby } from "../contexts/LobbyContext";
 export default function QRCodePopup() {
 
     const { showQR, setShowQR, lobbyCode } = useLobby();
-    const url = `https://localhost:5173/join/${lobbyCode}`;
+    const url = `https://game-night-sage-nine.vercel.app/join/${lobbyCode}`;
 
     return (
         <>
