@@ -11,19 +11,31 @@ import { socket } from "../socket";
 import { useNavigate } from "react-router-dom";
 import { QrCode } from "react-bootstrap-icons";
 import QRCodePopup from "../components/QRCodePopup";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function LobbyPage() {
 
-    const { lobbyCode, setLobbyCode, setAdmin, admin, currentGame, setPopup, setAYSPopup, waitingPlayers, showQR, setShowQR } = useGlobal();
-    const { loading } = useAuth();
+    const { setPopup, setAYSPopup } = useGlobal();
+    const { lobbyCode, setLobbyCode, admin, setAdmin, currentGame, setShowQR } = useLobby();
+    const { loading, user } = useAuth();
 
     const [enterLobby, setEnterLobby] = useState(false);
     const [err, setErr] = useState('');
     const navigate = useNavigate();
 
+    //lista giocatori senza player in attesa e senza il proprio nome
+    const [filteredPlayers, setFilteredPlayers] = useState([]);
+
+    //le informazioni sull'utente
+    const [loggedPlayer, setLoggedPlayer] = useState([]);
+
+    //lista giocatori in attesa
+    const [waitingPlayers, setWaitingPlayers] = useState([]);
+
+    const currentUserId = user?.id;
 
 
-
+    //funzioni della lobby
     function createLobby() {
         api.post('/lobbys')
             .then(res => {
@@ -45,32 +57,39 @@ export default function LobbyPage() {
         navigate('/home');
     }
 
+    // Carica la lista dei giocatori dal server (chiamata HTTP normale)
+    const loadPlayers = () => {
+        api.get(`/lobbys/${lobbyCode}/players`)
+            .then(res => {
+                //Lista giocatori in lobby tranne te
+                setFilteredPlayers(res.data.filter(player => player.userId !== user.id && player.admission_status !== 'pending'));
+                //Dati tuoi
+                setLoggedPlayer(res.data.find(player => player.userId === user.id));
+                //Lista giocatori in attesa
+                setWaitingPlayers(res.data.filter(player => player.userId !== user.id && player.admission_status === 'pending'));
+            })
+    };
+
     useEffect(() => {
 
-        const onRemoved = ({ userId }) => {
-            if (userId === currentUserId) {
-                setPopup('Sei stato rimosso dalla lobby');
-                setLobbyCode('');
-                navigate('/home');
-                return;
-            }
-        };
+        if (lobbyCode) loadPlayers();
 
-        const onDeleted = () => {
-            setPopup('La lobby è stata eliminata');
-            setAdmin(false);
-            setLobbyCode('');
-            navigate('/home');
-        };
+        const onChange = () => loadPlayers();
 
-        socket.on('player_removed', onRemoved);
-        socket.on('lobby_deleted', onDeleted);
+        socket.on('player_requested', onChange);
+        socket.on('player_joined', onChange);
+        socket.on('player_left', onChange);
+        socket.on('admin_changed', onChange);
+        socket.on('player_removed', onChange);
 
         return () => {
-            socket.off('player_removed', onRemoved);
-            socket.off('lobby_deleted', onDeleted);
-        }
-    }, [lobbyCode])
+            socket.off('player_requested', onChange);
+            socket.off('player_joined', onChange);
+            socket.off('player_left', onChange);
+            socket.off('admin_changed', onChange);
+            socket.off('player_removed', onChange);
+        };
+    }, [lobbyCode, currentUserId]);
 
     return (
         <>
@@ -102,12 +121,12 @@ export default function LobbyPage() {
                                     <h4>Gioco in corso: {currentGame}</h4>
                                 }
                                 <h4>Membri della lobby:</h4>
-                                <LobbyList />
+                                <LobbyList filteredPlayers={filteredPlayers} loggedPlayer={loggedPlayer} />
                                 {
                                     (admin && waitingPlayers.length > 0) &&
                                     <>
                                         <h4>Giocatori in attesa:</h4>
-                                        <WaitingList />
+                                        <WaitingList waitingPlayers={waitingPlayers} />
                                     </>
                                 }
                                 {

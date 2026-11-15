@@ -1,6 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { useGlobal } from '../contexts/GlobalContext';
-import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
 import api from '../api';
 

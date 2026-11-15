@@ -6,11 +6,13 @@ import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import Loader from "../components/Loader";
 import api from "../api";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function AccessPage() {
 
-    const { accessType, setAccessType, waiting, setWaiting, setInvited, setLobbyCode } = useGlobal();
-    const { user, loading } = useAuth();
+    const { accessType, setAccessType, setInvited } = useGlobal();
+    const { setLobbyCode } = useLobby();
+    const { user, loading, waiting, setWaiting } = useAuth();
 
     const { lobbyCode } = useParams();
 
@@ -28,20 +30,20 @@ export default function AccessPage() {
 
         // se l'utente è entrato tramite cookie (user non nullo)
         if (user) {
+            // già in attesa (es. dopo un ricaricamento): resto qui, non rimando la richiesta
+            if (user.admission_status === 'pending') return;
+
             // se è stato invitato resta qui in attesa di essere accettato
             if (lobbyCode) {
-                setWaiting(true);
                 //invio la richiesta di accesso alla lobby
                 api.post(`/lobbys/${lobbyCode}/players`)
-                    .then(res => {
-                        console.log(res.data.message)
-                    })
-                    .catch(err => console.error(err.response?.data?.message))
+                    .then(() => setWaiting(true)) // spostato qui: attesa solo se la richiesta è andata a buon fine
+                    .catch(err => console.error(err.response?.data?.message));
             }
             // altrimenti va direttamente alla home
             else navigate('/home');
         }
-    }, [loading]); //quando la useeffect ha finito so se user esiste o no (se l'utente entra tramite cookie)
+    }, [loading]);//quando la useeffect ha finito so se user esiste o no (se l'utente entra tramite cookie)
 
     //Finché la useEffect di AuthContext non ha finito mostro un loader
     if (loading) return <Loader />;

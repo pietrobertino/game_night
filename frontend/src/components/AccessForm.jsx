@@ -3,11 +3,14 @@ import api from "../api";
 import { useGlobal } from "../contexts/GlobalContext"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function AccessForm() {
 
-    const { invited, setWaiting, accessType, lobbyCode } = useGlobal();
-    const { login } = useAuth();
+    const { invited, accessType } = useGlobal();
+    const { lobbyCode } = useLobby();
+    const { login, setWaiting } = useAuth();
+
     const navigate = useNavigate();
 
     const [isLoading, setIsLoading] = useState(false);

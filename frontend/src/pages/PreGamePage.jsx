@@ -1,11 +1,11 @@
 import { Link, useParams } from "react-router-dom"
 import api from "../api";
 import { useEffect, useState } from "react";
-import { useGlobal } from "../contexts/GlobalContext";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function PreGamePage() {
 
-    const { admin, lobbyCode } = useGlobal();
+    const { admin, lobbyCode } = useLobby();
 
     const { gameSlug } = useParams();
     const [gameData, setGameData] = useState({});

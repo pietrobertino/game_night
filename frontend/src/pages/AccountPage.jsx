@@ -5,11 +5,14 @@ import { useState, useEffect } from 'react';
 import Loader from '../components/Loader';
 import NicknameForm from '../components/NicknameForm';
 import CancelAccountForm from '../components/CancelAccountForm';
+import { useLobby } from '../contexts/LobbyContext';
 
 export default function AccountPage() {
 
-    const { setAccessType, lobbyCode, setAYSPopup } = useGlobal();
+    const { setAccessType, setAYSPopup } = useGlobal();
+    const { lobbyCode } = useLobby();
     const { logout, loading, user } = useAuth();
+
     const navigate = useNavigate();
 
 

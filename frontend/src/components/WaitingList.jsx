@@ -6,49 +6,13 @@ import { useAuth } from '../contexts/AuthContext';
 import LobbyListItem from './LobbyListItem';
 import { useApproval } from '../contexts/ApprovalContext';
 
-export default function WaitingList() {
+export default function WaitingList({ waitingPlayers }) {
 
-    const { lobbyCode, setShowInvitePopup, waitingPlayers, setWaitingPlayers } = useGlobal();
+    const { setShowInvitePopup } = useGlobal();
     const { acceptPlayer, deletePlayer } = useApproval();
-    const { user } = useAuth();
-    const currentUserId = user.id;
 
 
-    // Carica la lista dei giocatori dal server (chiamata HTTP normale)
-    const loadPlayers = () => {
-        api.get(`/lobbys/${lobbyCode}/players`)
-            .then(res => {
-                setWaitingPlayers(res.data.filter(player => player.userId !== user.id && player.admission_status === 'pending'));
-            })
-    };
 
-    useEffect(() => {
-        // Lista iniziale: gli eventi socket gestiscono solo i cambiamenti successivi
-        loadPlayers();
-
-        const onChange = () => loadPlayers();
-
-        // L'admin ha espulso un giocatore.
-        // Cosa fare: se sono io, esco dalla pagina; altrimenti lo tolgo dalla lista
-        const onRemoved = ({ userId }) => {
-            if (userId !== currentUserId) {
-                loadPlayers();
-            }
-        };
-
-        socket.on('player_requested', onChange);
-        socket.on('player_joined', onChange);
-        socket.on('player_left', onChange);
-        socket.on('player_removed', onRemoved);
-
-        // Pulizia: quando esci dalla pagina tolgo tutti gli ascolti
-        return () => {
-            socket.off('player_requested', onChange);
-            socket.off('player_left', onChange);
-            socket.off('player_joined', onChange);
-            socket.off('player_removed', onRemoved);
-        };
-    }, [lobbyCode, currentUserId]);
 
     return (
         <ul>

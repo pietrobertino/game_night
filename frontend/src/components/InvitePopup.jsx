@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useGlobal } from "../contexts/GlobalContext"
 import { socket } from "../socket";
 import { useApproval } from "../contexts/ApprovalContext";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function InvitePopup() {
 
-    const { admin, showInvitePopup, setShowInvitePopup } = useGlobal();
+    const { showInvitePopup, setShowInvitePopup } = useGlobal();
+    const { admin } = useLobby();
     const { acceptPlayer, deletePlayer } = useApproval();
 
     const [nickname, setNickname] = useState('');
