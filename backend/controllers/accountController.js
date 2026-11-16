@@ -157,7 +157,7 @@ const store = (req, res) => {
         const sql = `INSERT INTO users (email_address, password_hash, account_type, nickname) VALUES (null, null, $1, $2) RETURNING id;`
 
         db.query(sql, [accountType, nickname], (err, insertResult) => {
-            if (err) return res.status(500).json({ error: true, message: err.message });
+            if (err) return res.status(500).json({ error: true, message: 'Internal database error' });
 
             const newUserId = insertResult.rows[0].id;
             setSessionCookie(res, newUserId);
