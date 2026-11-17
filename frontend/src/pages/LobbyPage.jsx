@@ -77,6 +77,7 @@ export default function LobbyPage() {
         const onChange = () => loadPlayers();
 
         socket.on('player_requested', onChange);
+        socket.on('player_status_changed', onChange);
         socket.on('player_joined', onChange);
         socket.on('player_left', onChange);
         socket.on('admin_changed', onChange);
@@ -84,6 +85,7 @@ export default function LobbyPage() {
 
         return () => {
             socket.off('player_requested', onChange);
+            socket.off('player_status_changed', onChange);
             socket.off('player_joined', onChange);
             socket.off('player_left', onChange);
             socket.off('admin_changed', onChange);

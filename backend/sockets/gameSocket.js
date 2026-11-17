@@ -266,38 +266,36 @@ const initGameSocket = (io) => {
         socket.on('disconnect', async () => {
             console.log(`Socket disconnesso per l'utente ID: ${userId}`);
             try {
-                const { rows: players } = await db.query(
-                    `SELECT lp.lobby_id, l.admin_id
-                     FROM lobby_players lp
-                     JOIN lobbys l ON l.id = lp.lobby_id
-                     WHERE lp.user_id = $1`,
-                    [userId]
-                );
+                // se ha ancora un'altra connessione attiva, non è offline
+                if (!(await isUserConnected(io, userId))) {
 
-                if (players.length > 0) {
-                    const lobbyId = players[0].lobby_id;
-
-                    await db.query(
-                        `UPDATE lobby_players SET connection_status = 'OFFLINE' WHERE lobby_id = $1 AND user_id = $2`,
-                        [lobbyId, userId]
+                    const { rows: players } = await db.query(
+                        `SELECT lp.lobby_id, l.admin_id
+                 FROM lobby_players lp
+                 JOIN lobbys l ON l.id = lp.lobby_id
+                 WHERE lp.user_id = $1`,
+                        [userId]
                     );
 
-                    io.to(`lobby_${lobbyId}`).emit('player_status_changed', {
-                        userId: userId,
-                        status: 'OFFLINE'
-                    });
+                    if (players.length > 0) {
+                        const lobbyId = players[0].lobby_id;
 
-                    // Se era l'admin e non ha altre schede aperte, parte il timer di eliminazione della lobby
-                    if (players[0].admin_id === userId && !(await isUserConnected(io, userId))) {
-                        scheduleLobbyDeletion(io, lobbyId, userId);
+                        await db.query(
+                            `UPDATE lobby_players SET connection_status = 'OFFLINE' WHERE lobby_id = $1 AND user_id = $2`,
+                            [lobbyId, userId]
+                        );
+
+                        io.to(`lobby_${lobbyId}`).emit('player_status_changed', { userId, status: 'OFFLINE' });
+
+                        if (players[0].admin_id === userId) {
+                            scheduleLobbyDeletion(io, lobbyId, userId);
+                        }
                     }
                 }
             } catch (err) {
                 console.error("Errore nella disconnessione del socket:", err);
             }
 
-            // Registro l'ultima attività e faccio partire il timer di eliminazione del guest
-            // (se l'account non è guest, deleteGuest non farà nulla)
             await updateLastSeen(userId);
             scheduleGuestDeletion(io, userId);
         });
