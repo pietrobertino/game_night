@@ -11,7 +11,7 @@ export default function InviteButton() {
         const shareData = {
             title: 'Partecipa alla mia lobby',
             text: 'Entra nella mia lobby di Game Night e giochiamo insieme',
-            url: `https://game-night-sage-nine.vercel.app/join/${lobbyCode}`,
+            url: `https://app.game-night.eu/join/${lobbyCode}`,
         };
 
         // 1. Verifica se il browser supporta la condivisione nativa
