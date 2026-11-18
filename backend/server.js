@@ -21,14 +21,14 @@ app.use(express.static('public'));
 
 //Configurazione CORS per l'app
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: 'http://localhost:5173',
     credentials: true
 }));
 
 // Configurazione Socket.io
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL,
+        origin: 'http://localhost:5173',
         credentials: true
     }
 });
