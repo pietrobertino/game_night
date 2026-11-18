@@ -7,12 +7,14 @@ import { useAuth } from "../contexts/AuthContext";
 import Loader from "../components/Loader";
 import api from "../api";
 import { useLobby } from "../contexts/LobbyContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function AccessPage() {
 
     const { accessType, setAccessType, setInvited } = useAccess();
     const { setLobbyCode } = useLobby();
     const { user, loading, waiting, setWaiting } = useAuth();
+    const { setPopup } = usePopup();
 
     const { lobbyCode } = useParams();
 
@@ -38,7 +40,13 @@ export default function AccessPage() {
                 //invio la richiesta di accesso alla lobby
                 api.post(`/lobbys/${lobbyCode}/players`)
                     .then(() => setWaiting(true)) // spostato qui: attesa solo se la richiesta è andata a buon fine
-                    .catch(err => console.error(err.response?.data?.message));
+                    .catch(err => {
+                        if (err.response?.status === 404) {
+                            setLobbyCode('');
+                            setPopup('Lobby non trovata');
+                            navigate('/lobbys');
+                        }
+                    });
             }
             // altrimenti va direttamente alla home
             else navigate('/home');

@@ -49,8 +49,8 @@ export default function AccountPage() {
                 user.account_type === 'guest' ?
                     <>
                         <NicknameForm />
-                        <button onClick={() => goToAccount('registration')}>Crea un account</button>
-                        <button onClick={() => goToAccount('login')}>Accedi al tuo account</button>
+                        <button onClick={() => setAYSPopup({ show: true, message: 'Creando un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('registration') })}>Crea un account</button>
+                        <button onClick={() => setAYSPopup({ show: true, message: 'Accedendo ad un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('login') })}>Accedi al tuo account</button>
                     </>
                     :
 
