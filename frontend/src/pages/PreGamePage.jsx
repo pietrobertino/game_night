@@ -3,8 +3,6 @@ import api from "../api";
 import { useEffect, useState } from "react";
 import { useLobby } from "../contexts/LobbyContext";
 import Loader from "../components/Loader";
-import { useState } from "react"
-import { Link, useParams } from "react-router-dom"
 import SettingsPopup from "../components/SettingsPopup"
 import gameSettings from "../data/gameSettings"
 import { People, Pencil } from "react-bootstrap-icons";
