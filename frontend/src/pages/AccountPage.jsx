@@ -1,15 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { useGlobal } from '../contexts/GlobalContext';
+import { useAccess } from '../contexts/AccessContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import Loader from '../components/Loader';
 import NicknameForm from '../components/NicknameForm';
 import CancelAccountForm from '../components/CancelAccountForm';
 import { useLobby } from '../contexts/LobbyContext';
+import { usePopup } from '../contexts/PopupContext';
 
 export default function AccountPage() {
 
-    const { setAccessType, setAYSPopup } = useGlobal();
+    const { setAccessType } = useAccess();
+    const { setAYSPopup } = usePopup();
     const { lobbyCode } = useLobby();
     const { logout, loading, user } = useAuth();
 

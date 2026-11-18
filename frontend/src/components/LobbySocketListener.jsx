@@ -1,15 +1,14 @@
-// components/LobbySocketListener.jsx
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { socket } from "../socket";
 import { useAuth } from "../contexts/AuthContext";
-import { useGlobal } from "../contexts/GlobalContext";
 import { useLobby } from "../contexts/LobbyContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function LobbySocketListener() {
 
     const { user, loading, waiting, setWaiting } = useAuth();
-    const { setPopup } = useGlobal();
+    const { setPopup } = usePopup();
     const { lobbyCode, setLobbyCode, setAdmin } = useLobby();
 
     const navigate = useNavigate();

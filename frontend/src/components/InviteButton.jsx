@@ -1,10 +1,10 @@
-import { useGlobal } from "../contexts/GlobalContext";
 import { useLobby } from "../contexts/LobbyContext";
+import { usePopup } from "../contexts/PopupContext";
 import baseUrl from "../url";
 
 export default function InviteButton() {
 
-    const { setPopup } = useGlobal();
+    const { setPopup } = usePopup();
     const { lobbyCode } = useLobby();
 
     const handleShare = async () => {

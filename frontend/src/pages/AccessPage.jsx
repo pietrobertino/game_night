@@ -1,4 +1,4 @@
-import { useGlobal } from "../contexts/GlobalContext";
+import { useAccess } from "../contexts/AccessContext";
 import WaitingScreen from "../components/WaitingScreen";
 import AccessForm from "../components/AccessForm";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,7 +10,7 @@ import { useLobby } from "../contexts/LobbyContext";
 
 export default function AccessPage() {
 
-    const { accessType, setAccessType, setInvited } = useGlobal();
+    const { accessType, setAccessType, setInvited } = useAccess();
     const { setLobbyCode } = useLobby();
     const { user, loading, waiting, setWaiting } = useAuth();
 
