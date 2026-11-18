@@ -1,8 +1,8 @@
-import { useGlobal } from "../contexts/GlobalContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function AreYouSurePopup() {
 
-    const { AYSPopup, setAYSPopup } = useGlobal();
+    const { AYSPopup, setAYSPopup } = usePopup();
 
     const action = AYSPopup.action;
 

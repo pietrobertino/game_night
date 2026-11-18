@@ -1,6 +1,5 @@
 import { useAuth } from "./AuthContext";
 import { useState, useEffect } from "react";
-import { useGlobal } from "./GlobalContext";
 import { createContext, useContext } from "react";
 
 const LobbyContext = createContext();

@@ -1,13 +1,13 @@
 import { useState } from "react"
 import api from "../api";
-import { useGlobal } from "../contexts/GlobalContext"
+import { useAccess } from "../contexts/AccessContext"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useLobby } from "../contexts/LobbyContext";
 
 export default function AccessForm() {
 
-    const { invited, accessType } = useGlobal();
+    const { invited, accessType } = useAccess();
     const { lobbyCode } = useLobby();
     const { login, setWaiting } = useAuth();
 

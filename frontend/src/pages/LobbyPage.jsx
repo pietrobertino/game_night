@@ -1,4 +1,3 @@
-import { useGlobal } from "../contexts/GlobalContext";
 import LobbyList from "../components/LobbyList";
 import api from "../api";
 import { useEffect, useState } from "react";
@@ -12,10 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { QrCode } from "react-bootstrap-icons";
 import QRCodePopup from "../components/QRCodePopup";
 import { useLobby } from "../contexts/LobbyContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function LobbyPage() {
 
-    const { setPopup, setAYSPopup } = useGlobal();
+    const { setAYSPopup } = usePopup();
     const { lobbyCode, setLobbyCode, admin, setAdmin, currentGame, setShowQR } = useLobby();
     const { loading, user } = useAuth();
 

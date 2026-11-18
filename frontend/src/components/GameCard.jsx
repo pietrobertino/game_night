@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import api from "../api";
 import { Star, StarFill } from "react-bootstrap-icons";
 import { useAuth } from "../contexts/AuthContext";
-import { useGlobal } from "../contexts/GlobalContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function Gamecard({ game }) {
 
     const { user, favs, setFavs } = useAuth();
-    const { setPopup } = useGlobal();
+    const { setPopup } = usePopup();
 
     function addToFavs(slug) {
         api.post(`games/addFavourite/${slug}`)

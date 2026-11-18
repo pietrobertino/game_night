@@ -45,7 +45,7 @@ export default function NicknameForm() {
         <form onSubmit={handleForm}>
             <label htmlFor="nickname">Nickname:</label>
             <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} onBlur={() => setNickTouched(true)} onClick={() => setNickTouched(false)} />
-            {showNickErr && <span>Nickname non valido</span>}
+            {showNickErr && <span>Nickname non valido: Deve essere di almeno 4 caratteri</span>}
             <button disabled={!nickValid || nickname === firstNickname} type='submit'>Cambia nickname</button>
             {showNickMess && <span>Nickname aggiornato!</span>}
         </form>

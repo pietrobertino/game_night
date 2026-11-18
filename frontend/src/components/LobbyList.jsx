@@ -1,19 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { socket } from '../socket';
 import api from '../api';
-import { useGlobal } from '../contexts/GlobalContext';
-import { useAuth } from '../contexts/AuthContext';
 import LobbyListItem from './LobbyListItem';
 import { Trash } from 'react-bootstrap-icons'
 import { Award } from 'react-bootstrap-icons'
 import { useApproval } from '../contexts/ApprovalContext';
 import { useLobby } from '../contexts/LobbyContext';
+import { usePopup } from '../contexts/PopupContext';
 
 // currentUserId: l'id dell'utente loggato (quello che ottieni dalla rotta /me)
 export default function LobbyList({ filteredPlayers, loggedPlayer }) {
 
-    const { setPopup, setAYSPopup } = useGlobal();
+    const { setPopup, setAYSPopup } = usePopup();
     const { lobbyCode, admin } = useLobby();
     const { deletePlayer } = useApproval();
 

@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react';
-import { socket } from '../socket';
-import api from '../api';
-import { useGlobal } from '../contexts/GlobalContext';
-import { useAuth } from '../contexts/AuthContext';
 import LobbyListItem from './LobbyListItem';
 import { useApproval } from '../contexts/ApprovalContext';
+import { usePopup } from '../contexts/PopupContext';
 
 export default function WaitingList({ waitingPlayers }) {
 
-    const { setShowInvitePopup } = useGlobal();
+    const { setShowInvitePopup } = usePopup();
     const { acceptPlayer, deletePlayer } = useApproval();
 
 

@@ -1,10 +1,11 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useLobby } from "../contexts/LobbyContext";
+import baseUrl from "../url";
 
 export default function QRCodePopup() {
 
     const { showQR, setShowQR, lobbyCode } = useLobby();
-    const url = `https://app.game-night.eu/join/${lobbyCode}`;
+    const url = `${baseUrl.frontUrl}/join/${lobbyCode}`;
 
     return (
         <>

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import { useGlobal } from "../contexts/GlobalContext";
+import { usePopup } from "../contexts/PopupContext";
 
 export default function GenericPopup() {
 
-    const { popup, setPopup } = useGlobal();
+    const { popup, setPopup } = usePopup();
 
     const [show, setShow] = useState(false);
 
