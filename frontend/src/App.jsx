@@ -26,6 +26,7 @@ function App() {
               <Route path="/lobby" element={<LobbyPage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/rules/:gameSlug" element={<PreGamePage />} />
+              <Route path="/game/:gameSlug" element={<GamePage />} />
             </Route>
             <Route path="*" element={<Page404 />} />
           </Routes>
