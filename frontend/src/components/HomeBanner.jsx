@@ -24,18 +24,18 @@ export default function HomeBanner() {
 
     return (
 
-        <div className="fixed-bottom z-3 d-flex justify-content-center mb-5">
+        <nav className="home-banner fixed-bottom z-3 d-flex justify-content-center mb-5">
             <div className="alert alert-success alert-dismissible fade show m-0 shadow d-flex justify-content-between align-items-center rounded-pill" style={{ maxWidth: '500px', width: '90%' }}>
-                <button className="btn" onClick={() => { if (showSearch) { setSearchParams(prev => prev.delete('search')); setSearch('') }; setShowSearch(!showSearch) }}><Search /></button>
+                <button aria-label="Cerca" className="btn home-banner__item" onClick={() => { if (showSearch) { setSearchParams(prev => prev.delete('search')); setSearch('') }; setShowSearch(!showSearch) }}><Search /></button>
                 {
                     user?.account_type === 'guest' ?
-                        <button className=" btn" onClick={() => { setPopup('Per usare la funzione dei preferiti devi crare un account brother') }}><Star /></button>
+                        <button aria-label="Preferiti" className=" btn" onClick={() => { setPopup('Per usare la funzione dei preferiti devi crare un account brother') }}><Star /></button>
                         :
-                        <button className=" btn" onClick={handleFavsToggle}>{showFavs ? <StarFill /> : <Star />}</button>
+                        <button aria-label="Preferiti" className=" btn" onClick={handleFavsToggle}>{showFavs ? <StarFill /> : <Star />}</button>
                 }
-                <Link className=" text-decoration-none text-black" to={`/account`} ><Person /></Link>
+                <Link aria-label="Profilo" className="home-banner__item text-decoration-none text-black" to={`/account`} ><Person /></Link>
             </div>
-        </div>
+        </nav>
 
     )
 }

@@ -42,10 +42,10 @@ export default function HomePage() {
     }, [showFavs, debouncedSearch]);
 
     return (
-        <>
+        <div className=" home-page">
             <SearchBar />
             <LobbyBanner />
-            <h1>Home Page</h1>
+            <h2 className="home-page__title">Scegli una modalità</h2>
             <HomeBanner />
             {/* renderizzo le card dei giochi sulla base dei dati estratti dalla api call */}
             {(games.length === 0)
@@ -59,12 +59,14 @@ export default function HomePage() {
                     }
                 </>
                 :
-                games.map(game => (
+                <div className=" game-list">
+                    {games.map(game => (
 
-                    <Gamecard key={game.id} game={game} />
-                ))
+                        <Gamecard key={game.id} game={game} />
+                    ))}
+                </div>
             }
-        </>
+        </div>
 
     )
 }

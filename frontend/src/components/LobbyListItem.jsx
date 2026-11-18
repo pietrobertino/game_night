@@ -1,16 +1,16 @@
-import { AwardFill } from "react-bootstrap-icons"
+import CrownIcon from "./CrownIcon"
 
 export default function LobbyListItem({ you, player }) {
 
     return (
-        <li>
-            {you ?
-                <span>{player.player_role === 'admin' && <AwardFill />} TU ({player.nickname}) {player.connection_status} </span>
-                :
-                <span>{player.player_role === 'admin' && <AwardFill />} {player.nickname} {player.connection_status} </span>
-            }
-
-
+        <li className="player-row">
+            <span>
+                {player.player_role === 'admin' && <span className="player-row__action"><CrownIcon filled /></span>}
+                <span className="player-row__name">{you ? `TU (${player.nickname})` : player.nickname}</span>
+                <span className={`player-row__status ${player.connection_status === 'ONLINE' ? 'is-online' : 'is-offline'}`}></span>
+            </span>
         </li>
     )
 }
+
+

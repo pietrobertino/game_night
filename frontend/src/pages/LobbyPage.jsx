@@ -35,6 +35,15 @@ export default function LobbyPage() {
     const currentUserId = user?.id;
 
 
+    // //API call / socket per i dati della lobby
+    // const lobbyCode = ""
+    // const currentGame = ""
+    // const myId = null
+    // const adminId = null
+    // const players = []          // { user_id, nickname, connection_status: 'ONLINE' | 'OFFLINE' }
+    // const waitingPlayers = []   // { user_id, nickname }
+
+
     //funzioni della lobby
     function createLobby() {
         api.post('/lobbys')
@@ -94,8 +103,7 @@ export default function LobbyPage() {
     }, [lobbyCode, currentUserId]);
 
     return (
-        <>
-            <h1>Lobby Page</h1>
+        <div className=" lobby-page">
             <QRCodePopup />
             {loading ?
                 <Loader />
@@ -113,32 +121,40 @@ export default function LobbyPage() {
 
                         lobbyCode ?
                             <>
-                                <div className=" d-flex justify-content-between">
-                                    <h3>Codice lobby: {lobbyCode}</h3>
+                                <div className=" d-flex justify-content-between lobby-info">
+                                    <p className="lobby-info__code">
+                                        Codice lobby: <span>{lobbyCode}</span>
+                                    </p>
                                     <button className=" btn btn-primary" onClick={() => setShowQR(true)}><QrCode /></button>
+                                    <button type="button" className="btn-pill btn-pill--orange">Invita</button>
                                     <InviteButton />
                                 </div>
+
                                 {
                                     currentGame &&
-                                    <h4>Gioco in corso: {currentGame}</h4>
+                                    <h2 className="lobby-page__title">
+                                        Gioco in corso: <span>{currentGame}</span>
+                                    </h2>
                                 }
                                 <h4>Membri della lobby:</h4>
+                                <h2 className="lobby-page__title">Lobby</h2>
                                 <LobbyList filteredPlayers={filteredPlayers} loggedPlayer={loggedPlayer} />
                                 {
                                     (admin && waitingPlayers.length > 0) &&
                                     <>
-                                        <h4>Giocatori in attesa:</h4>
+                                        <hr className="lobby-page__divider" />
+                                        <h2 className="lobby-page__title">Giocatori in attesa</h2>
                                         <WaitingList waitingPlayers={waitingPlayers} />
                                     </>
                                 }
                                 {
                                     admin ?
                                         <>
-                                            <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler eliminare la lobby? ', action: () => deleteLobby() })} className=" btn btn-danger">Elimina lobby</button>
+                                            <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler eliminare la lobby? ', action: () => deleteLobby() })} className="btn-pill btn-pill--red lobby-page__delete">Elimina lobby</button>
                                         </>
                                         :
                                         <>
-                                            <button className=" btn btn-danger" onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler abbandonare la lobby? ', action: () => quitLobby() })}>Esci dalla lobby</button>
+                                            <button className="btn-pill btn-pill--red lobby-page__delete" onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler abbandonare la lobby? ', action: () => quitLobby() })}>Esci dalla lobby</button>
                                         </>
                                 }
                             </>
@@ -156,6 +172,7 @@ export default function LobbyPage() {
                 </>
             }
 
-        </>
+        </div>
+
     )
 }
