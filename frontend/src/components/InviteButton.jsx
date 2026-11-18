@@ -1,5 +1,6 @@
 import { useGlobal } from "../contexts/GlobalContext";
 import { useLobby } from "../contexts/LobbyContext";
+import baseUrl from "../url";
 
 export default function InviteButton() {
 
@@ -11,7 +12,7 @@ export default function InviteButton() {
         const shareData = {
             title: 'Partecipa alla mia lobby',
             text: 'Entra nella mia lobby di Game Night e giochiamo insieme',
-            url: `https://app.game-night.eu/join/${lobbyCode}`,
+            url: `${baseUrl.frontUrl}/join/${lobbyCode}`,
         };
 
         // 1. Verifica se il browser supporta la condivisione nativa

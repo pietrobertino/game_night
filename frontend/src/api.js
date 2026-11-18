@@ -1,7 +1,8 @@
 import axios from 'axios';
+import baseUrl from './url';
 
 const api = axios.create({
-    baseURL: 'https://api.game-night.eu',
+    baseURL: `${baseUrl.backUrl}`,
     withCredentials: true // il browser manda e salva il cookie session_token
 });
 
