@@ -8,6 +8,7 @@ import Loader from "../components/Loader";
 import api from "../api";
 import { useLobby } from "../contexts/LobbyContext";
 import { usePopup } from "../contexts/PopupContext";
+import logo from "../assets/logo.png";
 
 export default function AccessPage() {
 
@@ -64,29 +65,41 @@ export default function AccessPage() {
 
                 <WaitingScreen />
                 :
-                <>
-                    {accessType === 'guest' &&
-                        <>
-                            <AccessForm />
-                            <a href="#" onClick={() => setAccessType('login')}>Ho un account</a>
-                            <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
-                        </>
-                    }
-                    {accessType === 'login' &&
-                        <>
-                            <AccessForm />
-                            <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
-                            <a href="#" onClick={() => setAccessType('registration')}>Crea un account</a>
-                        </>
-                    }
-                    {accessType === 'registration' &&
-                        <>
-                            <AccessForm />
-                            <a href="#" onClick={() => setAccessType('login')}>Ho già un account</a>
-                            <a href="#" onClick={() => setAccessType('guest')}>Entra come guest</a>
-                        </>
-                    }
-                </>
+                <main className="access-page">
+                    <img className="access-page__logo" src={logo} alt="Game Night" />
+
+                    <section className="access-page__card">
+                        <h1 className="access-page__title">
+                            {accessType === 'guest' && 'Entra come guest'}
+                            {accessType === 'login' && "Accedi all'account"}
+                            {accessType === 'registration' && 'Creazione account'}
+                        </h1>
+                        {accessType === 'guest' &&
+                            <AccessForm>
+                                <div className="access-form__links">
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('login')}>Ho un account</button>
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('registration')}>Crea un account</button>
+                                </div>
+                            </AccessForm>
+                        }
+                        {accessType === 'login' &&
+                            <AccessForm>
+                                <div className="access-form__links">
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('guest')}>Entra come guest</button>
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('registration')}>Crea un account</button>
+                                </div>
+                            </AccessForm>
+                        }
+                        {accessType === 'registration' &&
+                            <AccessForm>
+                                <div className="access-form__links">
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('login')}>Ho già un account</button>
+                                    <button type="button" className="access-form__link" onClick={() => setAccessType('guest')}>Entra come guest</button>
+                                </div>
+                            </AccessForm>
+                        }
+                    </section>
+                </main>
             }
         </>
     )

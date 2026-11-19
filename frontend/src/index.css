@@ -2,24 +2,19 @@
 
 /* ---------- FONT ---------- */
 
+/* Thunder: titoli dei giochi e del ruolo */
 @font-face {
-    font-family: "PP Neue Corp Compact";
-    src: url("/fonts/PPNeueCorp-CompactUltrabold.otf") format("opentype");
+    font-family: "Thunder";
+    src: url("/fonts/Thunder-ExtraBoldLC.ttf") format("truetype");
     font-weight: 800;
     font-display: swap;
 }
 
+/* Clash Grotesk: tutto il resto (700 = bold per i titoli, 500 = medium per il testo) */
 @font-face {
-    font-family: "PP Neue Corp Compact";
-    src: url("/fonts/PPNeueCorp-CompactMedium.otf") format("opentype");
-    font-weight: 500;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Beni";
-    src: url("/fonts/BeniBlack.ttf") format("truetype");
-    font-weight: 900;
+    font-family: "Clash Grotesk";
+    src: url("/fonts/ClashGrotesk-Variable.ttf") format("truetype");
+    font-weight: 200 700;
     font-display: swap;
 }
 
@@ -36,8 +31,8 @@
     --gn-gutter: 20px;
     --gn-radius-card: 14px;
 
-    --gn-font-display: "Beni", sans-serif;
-    --gn-font-body: "PP Neue Corp Compact", system-ui, sans-serif;
+    --gn-font-display: "Thunder", sans-serif;
+    --gn-font-body: "Clash Grotesk", system-ui, sans-serif;
 }
 
 /* ---------- BASE ---------- */
@@ -53,6 +48,7 @@ body {
     background-color: var(--gn-bg);
     color: var(--gn-text);
     font-family: var(--gn-font-body);
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
 }
@@ -132,7 +128,7 @@ a:hover {
     margin: 0;
     padding: 32px 0 18px;
     font-family: var(--gn-font-body);
-    font-weight: 800;
+    font-weight: 700;
     font-size: 20px;
     line-height: 1;
     text-transform: uppercase;
@@ -169,8 +165,8 @@ a:hover {
     margin: 0;
     padding-right: 40px;
     font-family: var(--gn-font-display);
-    font-weight: 900;
-    font-size: 26px;
+    font-weight: 800;
+    font-size: 34px;
     line-height: 1;
     text-transform: uppercase;
 }
@@ -180,8 +176,8 @@ a:hover {
     align-items: center;
     gap: 8px;
     margin: 0;
-    font-family: var(--gn-font-display);
-    font-weight: 900;
+    font-family: var(--gn-font-body);
+    font-weight: 700;
     font-size: 16px;
     line-height: 1;
     text-transform: uppercase;
@@ -244,7 +240,7 @@ a:hover {
     border-radius: 999px;
     color: var(--gn-text);
     font-family: var(--gn-font-body);
-    font-weight: 800;
+    font-weight: 700;
     font-size: 14px;
     line-height: 1;
     text-transform: uppercase;
@@ -285,7 +281,7 @@ a:hover {
 
 .lobby-info__code {
     margin: 0;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 14px;
     text-transform: uppercase;
 }
@@ -297,7 +293,7 @@ a:hover {
 
 .lobby-page__title {
     margin: 28px 0 14px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 20px;
     line-height: 1;
     text-transform: uppercase;
@@ -417,7 +413,7 @@ a:hover {
 
 .game-page__title {
     margin: 0;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 20px;
     line-height: 1;
     text-transform: uppercase;
@@ -451,8 +447,8 @@ a:hover {
     padding-top: 10px;
     border-top: 1px solid var(--gn-bg);
     font-family: var(--gn-font-display);
-    font-weight: 900;
-    font-size: 46px;
+    font-weight: 800;
+    font-size: 60px;
     line-height: 1;
     text-align: center;
     text-transform: uppercase;
@@ -472,8 +468,8 @@ a:hover {
 .game-page__hint-word {
     margin: 10px 0 0;
     color: var(--gn-accent);
-    font-family: var(--gn-font-display);
-    font-weight: 900;
+    font-family: var(--gn-font-body);
+    font-weight: 700;
     font-size: 36px;
     line-height: 1;
     text-transform: uppercase;
@@ -547,7 +543,7 @@ a:hover {
 
 .popup__title {
     margin: 0 0 6px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 22px;
     line-height: 1;
     text-transform: uppercase;
@@ -576,7 +572,7 @@ a:hover {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 16px;
 }
 
@@ -586,7 +582,7 @@ a:hover {
     border: 0;
     background: none;
     color: inherit;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 18px;
     line-height: 1;
 }
@@ -642,8 +638,8 @@ a:hover {
     margin: 0;
     color: var(--gn-accent);
     font-family: var(--gn-font-display);
-    font-weight: 900;
-    font-size: 52px;
+    font-weight: 800;
+    font-size: 68px;
     line-height: 1;
     text-transform: uppercase;
 }
@@ -653,8 +649,8 @@ a:hover {
     align-items: center;
     gap: 8px;
     margin: 0;
-    font-family: var(--gn-font-display);
-    font-weight: 900;
+    font-family: var(--gn-font-body);
+    font-weight: 700;
     font-size: 16px;
     line-height: 1;
     text-transform: uppercase;
@@ -673,7 +669,7 @@ a:hover {
 
 .pregame-page__title {
     margin: 0;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 20px;
     line-height: 1;
     text-transform: uppercase;
@@ -721,8 +717,8 @@ a:hover {
     gap: 70px;
     padding: 0 var(--gn-gutter) 120px;
     background-color: var(--gn-bg);
-    font-family: var(--gn-font-display);
-    font-weight: 900;
+    font-family: var(--gn-font-body);
+    font-weight: 700;
     text-align: center;
     text-transform: uppercase;
 }
@@ -734,7 +730,7 @@ a:hover {
 .guess-alert__warning {
     margin: 0;
     color: var(--gn-red);
-    font-size: min(17.5vw, 88px);
+    font-size: min(14vw, 70px);
     line-height: 1.12;
 }
 
@@ -743,7 +739,7 @@ a:hover {
     color: var(--gn-text);
     font-family: inherit;
     font-weight: inherit;
-    font-size: min(11.7vw, 58px);
+    font-size: min(10vw, 50px);
     line-height: 1.3;
 }
 
@@ -754,4 +750,136 @@ a:hover {
     transform: translateX(-50%);
     min-width: 134px;
     padding: 14px 32px;
+}
+
+/* ---------- ACCESSO ---------- */
+
+.access-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100dvh;
+    padding: 130px 38px 60px;
+    background: url("/images/access-bg.png") top center / cover no-repeat, var(--gn-bg);
+}
+
+.access-page__logo {
+    width: 265px;
+    max-width: 100%;
+    height: auto;
+}
+
+.access-page__card {
+    width: 100%;
+    margin-top: 125px;
+    padding: 30px 26px 18px;
+    border-radius: 24px;
+    background-color: var(--gn-text);
+    color: var(--gn-bg);
+}
+
+.access-page__title {
+    margin: 0 0 18px;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.access-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.access-form__field {
+    min-height: 66px;
+}
+
+.access-form__input {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--gn-bg);
+    border-radius: 999px;
+    background: none;
+    color: var(--gn-bg);
+    font-family: var(--gn-font-body);
+    font-weight: 500;
+    font-size: 14px;
+    outline: none;
+}
+
+.access-form__input::placeholder {
+    color: #8a8986;
+    text-transform: uppercase;
+}
+
+.access-form__input:focus {
+    border-width: 2px;
+    padding: 0 11px;
+}
+
+.access-form__password {
+    position: relative;
+}
+
+.access-form__password .access-form__input {
+    padding-right: 40px;
+}
+
+.access-form__eye {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #8a8986;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.access-form__error {
+    display: block;
+    padding: 4px 12px 0;
+    color: var(--gn-red);
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.access-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.access-form__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding-left: 12px;
+}
+
+.access-form__link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #4f7fd9;
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.access-form__submit {
+    margin-left: auto;
+    padding: 8px 16px;
+    font-size: 16px;
+}
+
+.access-form__submit:disabled {
+    opacity: 0.6;
 }
