@@ -21,7 +21,7 @@ app.use(express.static('public'));
 
 //Configurazione CORS per l'app
 app.use(cors({
-    origin: 'https://app.game-night.eu',
+    origin: process.env.FRONTEND_URL,
     credentials: true
 }));
 
