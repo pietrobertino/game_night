@@ -8,7 +8,7 @@ import { useLobby } from "../contexts/LobbyContext";
 // children = i link per cambiare tipo di accesso, mostrati di fianco al bottone
 export default function AccessForm({ children }) {
 
-    const { invited, accessType } = useAccess();
+    const { invited, accessType, setAccessType } = useAccess();
     const { lobbyCode } = useLobby();
     const { login, setWaiting } = useAuth();
 
@@ -149,8 +149,12 @@ export default function AccessForm({ children }) {
                     </div>
                 </>
             }
+            <div className="access-form__links">
+                <button type="button" className="access-form__link" onClick={() => { accessType === 'guest' || accessType === 'registration' ? setAccessType('login') : setAccessType('guest') }}>{accessType === 'guest' || accessType === 'registration' ? 'Ho già un account' : 'Entra come guest'}</button>
+                <button type="button" className="access-form__link" onClick={() => { accessType === 'registration' ? setAccessType('guest') : setAccessType('registration') }}>{accessType === 'registration' ? 'Entra come guest' : 'Crea un account'}</button>
+            </div>
             <button type="submit" className="btn-pill btn-pill--orange access-form__submit" disabled={isLoading || ((accessType === 'guest' || accessType === 'registration') && !nickValid) || ((accessType === 'login' || accessType === 'registration') && (!emailValid || !passValid))} >
-                {accessType === 'guest' && 'Entra come guest'}
+                {accessType === 'guest' && 'Entra'}
                 {accessType === 'login' && 'Accedi'}
                 {accessType === 'registration' && 'Registrati'}
             </button>

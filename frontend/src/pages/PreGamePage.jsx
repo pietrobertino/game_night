@@ -56,7 +56,7 @@ export default function PreGamePage() {
                             <p className="pregame-page__rules">{gameData.description}</p>
                         </section>
                         <div className=" text-center">
-                            <Link to={`/games/${gameSlug}`} className="btn-pill btn-pill--orange pregame-page__play"><button className=" btn btn-secondary" disabled={!permitted}>Gioca</button></Link >
+                            <Link to={`/games/${gameSlug}`} className="btn-pill btn-pill--orange pregame-page__play" aria-disabled={!permitted}>Gioca</Link >
                             {!permitted && <div className=" text-warning">Puoi avviare il gioco solo se sei l'host di una lobby</div>}
                         </div>
                         {

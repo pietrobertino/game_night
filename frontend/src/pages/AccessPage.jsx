@@ -12,7 +12,7 @@ import logo from "../assets/logo.png";
 
 export default function AccessPage() {
 
-    const { accessType, setAccessType, setInvited } = useAccess();
+    const { accessType, setInvited } = useAccess();
     const { setLobbyCode } = useLobby();
     const { user, loading, waiting, setWaiting } = useAuth();
     const { setPopup } = usePopup();
@@ -74,30 +74,7 @@ export default function AccessPage() {
                             {accessType === 'login' && "Accedi all'account"}
                             {accessType === 'registration' && 'Creazione account'}
                         </h1>
-                        {accessType === 'guest' &&
-                            <AccessForm>
-                                <div className="access-form__links">
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('login')}>Ho un account</button>
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('registration')}>Crea un account</button>
-                                </div>
-                            </AccessForm>
-                        }
-                        {accessType === 'login' &&
-                            <AccessForm>
-                                <div className="access-form__links">
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('guest')}>Entra come guest</button>
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('registration')}>Crea un account</button>
-                                </div>
-                            </AccessForm>
-                        }
-                        {accessType === 'registration' &&
-                            <AccessForm>
-                                <div className="access-form__links">
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('login')}>Ho già un account</button>
-                                    <button type="button" className="access-form__link" onClick={() => setAccessType('guest')}>Entra come guest</button>
-                                </div>
-                            </AccessForm>
-                        }
+                        <AccessForm />
                     </section>
                 </main>
             }

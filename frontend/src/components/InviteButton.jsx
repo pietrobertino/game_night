@@ -31,9 +31,7 @@ export default function InviteButton() {
     };
 
     return (
-        <button className=" btn btn-warning" onClick={handleShare}>
-            Invita
-        </button>
+        <button type="button" className="btn-pill btn-pill--orange" onClick={handleShare}>Invita</button>
     );
 }
 

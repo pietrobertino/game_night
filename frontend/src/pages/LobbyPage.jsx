@@ -35,15 +35,6 @@ export default function LobbyPage() {
     const currentUserId = user?.id;
 
 
-    // //API call / socket per i dati della lobby
-    // const lobbyCode = ""
-    // const currentGame = ""
-    // const myId = null
-    // const adminId = null
-    // const players = []          // { user_id, nickname, connection_status: 'ONLINE' | 'OFFLINE' }
-    // const waitingPlayers = []   // { user_id, nickname }
-
-
     //funzioni della lobby
     function createLobby() {
         api.post('/lobbys')
@@ -125,9 +116,10 @@ export default function LobbyPage() {
                                     <p className="lobby-info__code">
                                         Codice lobby: <span>{lobbyCode}</span>
                                     </p>
-                                    <button className=" btn btn-primary" onClick={() => setShowQR(true)}><QrCode /></button>
-                                    <button type="button" className="btn-pill btn-pill--orange">Invita</button>
-                                    <InviteButton />
+                                    <div className=" d-flex justify-content-between gap-3">
+                                        <button className="btn-pill btn-pill--red" onClick={() => setShowQR(true)}><QrCode /></button>
+                                        <InviteButton />
+                                    </div>
                                 </div>
 
                                 {
@@ -136,7 +128,6 @@ export default function LobbyPage() {
                                         Gioco in corso: <span>{currentGame}</span>
                                     </h2>
                                 }
-                                <h4>Membri della lobby:</h4>
                                 <h2 className="lobby-page__title">Lobby</h2>
                                 <LobbyList filteredPlayers={filteredPlayers} loggedPlayer={loggedPlayer} />
                                 {
@@ -159,15 +150,15 @@ export default function LobbyPage() {
                                 }
                             </>
                             :
-                            <>
-                                <button onClick={createLobby}>
+                            <div className=" buttons m-3 d-flex justify-content-between align-items-center gap-3 pt-3">
+                                <button className=" btn-pill btn-pill--orange flex-grow-1" onClick={createLobby}>
                                     Crea Lobby
                                 </button>
-                                <button onClick={() => setEnterLobby(true)}>
+                                <button className=" btn-pill btn-pill--orange flex-grow-1" onClick={() => setEnterLobby(true)}>
                                     Entra in una lobby
                                 </button>
-                                {err && <span>Errore: {err}</span>}
-                            </>
+                                {err && <div className=" mt-3">Errore: {err}</div>}
+                            </div>
                     }
                 </>
             }

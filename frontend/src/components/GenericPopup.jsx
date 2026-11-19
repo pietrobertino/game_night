@@ -20,7 +20,7 @@ export default function GenericPopup() {
         <>
             {show &&
 
-                <div className=" d-flex justify-content-between ">
+                <div className="popup container">
                     <h3>{popup}</h3>
                     <button className=" btn-close" onClick={() => setShow(false)}></button>
                 </div >

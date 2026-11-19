@@ -391,7 +391,8 @@ a:hover {
 
 .lobby-page__delete {
     position: fixed;
-    bottom: 35px; /* centrato sull'altezza dell'home-banner (bottom 28px + 56px di altezza) */
+    bottom: 35px;
+    /* centrato sull'altezza dell'home-banner (bottom 28px + 56px di altezza) */
     left: 50%;
     transform: translateX(-50%);
     z-index: 20;

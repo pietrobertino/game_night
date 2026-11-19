@@ -10,12 +10,13 @@ export default function QRCodePopup() {
     return (
         <>
             {showQR &&
-                <div>
-                    <button className=" btn btn-close" onClick={() => setShowQR(false)}></button>
+                <div className="popup popup__box popup__box--orange">
+                    <button className=" popup__close" onClick={() => setShowQR(false)}>X</button>
                     <QRCodeSVG
                         value={url}
                         size={200}
                         level="M"
+                        bgColor="#e8902a"
                     />
 
                     <p>Scansiona per entrare!</p>
