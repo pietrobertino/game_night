@@ -24,7 +24,7 @@ export default function HomeBanner() {
 
     return (
 
-        <div className="fixed-bottom z-3 d-flex justify-content-center mb-5">
+        <nav className="home-banner">
             <div className="alert alert-success alert-dismissible fade show m-0 shadow d-flex justify-content-between align-items-center rounded-pill" style={{ maxWidth: '500px', width: '90%' }}>
                 <button className="btn" onClick={() => { if (showSearch) { setSearchParams(prev => prev.delete('search')); setSearch('') }; setShowSearch(!showSearch) }}><Search /></button>
                 {
@@ -35,7 +35,7 @@ export default function HomeBanner() {
                 }
                 <Link className=" text-decoration-none text-black" to={`/account`} ><Person /></Link>
             </div>
-        </div>
+        </nav>
 
     )
 }
