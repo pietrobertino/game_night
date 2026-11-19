@@ -24,7 +24,7 @@ export default function HomeBanner() {
 
     return (
 
-        <nav className="home-banner fixed-bottom z-3 d-flex justify-content-center mb-5">
+        <nav className="home-banner">
             <div className="alert alert-success alert-dismissible fade show m-0 shadow d-flex justify-content-between align-items-center rounded-pill" style={{ maxWidth: '500px', width: '90%' }}>
                 <button aria-label="Cerca" className="btn home-banner__item" onClick={() => { if (showSearch) { setSearchParams(prev => prev.delete('search')); setSearch('') }; setShowSearch(!showSearch) }}><Search /></button>
                 {
