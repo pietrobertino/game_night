@@ -1,6 +1,6 @@
 import { useLobby } from "../contexts/LobbyContext";
 import { usePopup } from "../contexts/PopupContext";
-import baseUrl from "../url";
+import baseUrl from "../data/url";
 
 export default function InviteButton() {
 
