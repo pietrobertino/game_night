@@ -1,6 +1,6 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useLobby } from "../contexts/LobbyContext";
-import baseUrl from "../url";
+import baseUrl from "../data/url";
 
 export default function QRCodePopup() {
 
