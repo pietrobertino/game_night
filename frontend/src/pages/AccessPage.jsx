@@ -9,15 +9,16 @@ import api from "../api";
 import { useLobby } from "../contexts/LobbyContext";
 import { usePopup } from "../contexts/PopupContext";
 import logo from "../assets/logo.png";
+import GenericPopup from "../components/GenericPopup";
 
 export default function AccessPage() {
 
     const { accessType, setInvited } = useAccess();
-    const { setLobbyCode } = useLobby();
+    const { setLobbyCode, lobbyCode } = useLobby();
     const { user, loading, waiting, setWaiting } = useAuth();
     const { setPopup } = usePopup();
 
-    const { lobbyCode } = useParams();
+    const { lobbyCodeUrl } = useParams();
 
     const navigate = useNavigate();
 
@@ -25,34 +26,42 @@ export default function AccessPage() {
         // finché /me non ha risposto non so se l'utente è loggato: aspetto
         if (loading) return;
 
-        // se nell'url c'è il codice di una lobby, sono stato invitato
-        if (lobbyCode) {
-            setInvited(true);
-            setLobbyCode(lobbyCode);
-        }
+        const handleLobbyEntry = async () => {
 
-        // se l'utente è entrato tramite cookie (user non nullo)
-        if (user) {
-            // già in attesa (es. dopo un ricaricamento): resto qui, non rimando la richiesta
-            if (user.admission_status === 'pending') return;
+            // se l'utente è entrato tramite cookie (user non nullo)
+            if (user) {
+                // se sono già in una lobby, vengo rimandato alla home
+                if (user?.lobby_code) {
+                    setPopup('Bro fai già parte di una lobby');
+                    navigate('/home');
+                    return;
+                }
 
-            // se è stato invitato resta qui in attesa di essere accettato
-            if (lobbyCode) {
-                //invio la richiesta di accesso alla lobby
-                api.post(`/lobbys/${lobbyCode}/players`)
-                    .then(() => setWaiting(true)) // spostato qui: attesa solo se la richiesta è andata a buon fine
-                    .catch(err => {
+                // già in attesa (es. dopo un ricaricamento): resto qui, non rimando la richiesta
+                if (user.admission_status === 'pending') return;
+
+                // se nell'url c'è il codice di una lobby, sono stato invitato
+                // se è stato invitato resta qui in attesa di essere accettato
+                if (lobbyCodeUrl) {
+                    try {
+                        await api.post(`/lobbys/${lobbyCodeUrl}/players`);
+                        setInvited(true);
+                        setLobbyCode(lobbyCodeUrl);
+                        setWaiting(true);
+                    } catch (err) {
                         if (err.response?.status === 404) {
                             setLobbyCode('');
-                            setPopup('Lobby non trovata');
-                            navigate('/lobbys');
+                            setPopup('La lobby non esiste');
+                            navigate('/home');
                         }
-                    });
+                    }
+                } else {
+                    navigate('/home');
+                }
             }
-            // altrimenti va direttamente alla home
-            else navigate('/home');
         }
-    }, [loading]);//quando la useeffect ha finito so se user esiste o no (se l'utente entra tramite cookie)
+        handleLobbyEntry();
+    }, [loading, lobbyCodeUrl, user]);//quando la useeffect ha finito so se user esiste o no (se l'utente entra tramite cookie)
 
     //Finché la useEffect di AuthContext non ha finito mostro un loader
     if (loading) return <Loader />;
@@ -61,6 +70,7 @@ export default function AccessPage() {
 
     return (
         <>
+            <GenericPopup />
             {waiting ?
 
                 <WaitingScreen />

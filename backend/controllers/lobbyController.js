@@ -143,11 +143,11 @@ const storeWaitingPlayer = (req, res) => {
 
             const lobbyId = lobbyResults.rows[0].id;
 
-            //se anche la lobby è presente, verifico che il giocatore non sia già presente nella lobby
-            const playerLobbySql = `SELECT * FROM lobby_players WHERE lobby_id = $1 AND user_id = $2`;
-            db.query(playerLobbySql, [lobbyId, userId], (playerLobbyErr, playerLobbyResults) => {
+            //se anche la lobby è presente, verifico che il giocatore non sia già presente in nessuna lobby
+            const playerLobbySql = `SELECT * FROM lobby_players WHERE user_id = $1`;
+            db.query(playerLobbySql, [userId], (playerLobbyErr, playerLobbyResults) => {
                 if (playerLobbyErr) return res.status(500).json({ error: 'Internal database error' });
-                if (playerLobbyResults.rows.length > 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in lobby' });
+                if (playerLobbyResults.rows.length > 0) return res.status(409).json({ error: 'Conflict', message: 'Player already in a lobby' });
 
                 //verificato che l'utente non è già presente il lobby, lo aggiungo come giocatore in attesa (defalut)
                 const insertSql = `INSERT INTO lobby_players (lobby_id, user_id, nickname) VALUES ($1, $2, $3)`;

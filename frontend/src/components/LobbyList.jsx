@@ -9,7 +9,7 @@ import CrownIcon from './CrownIcon';
 // currentUserId: l'id dell'utente loggato (quello che ottieni dalla rotta /me)
 export default function LobbyList({ filteredPlayers, loggedPlayer }) {
 
-    const { setPopup, setAYSPopup } = usePopup();
+    const { setAYSPopup } = usePopup();
     const { lobbyCode, admin } = useLobby();
     const { deletePlayer } = useApproval();
 
@@ -29,8 +29,10 @@ export default function LobbyList({ filteredPlayers, loggedPlayer }) {
                 <>
                     {filteredPlayers.map(player => (
                         <div key={player.userId} className=' d-flex justify-content-between'>
-                            <LobbyListItem player={player} you={false} />
-                            <button className="player-row__action" aria-label="Rendi admin" onClick={() => setAYSPopup({ show: true, message: `Sei sicuro di voler rendere ${player.nickname} il nuovo admin della lobby?`, action: () => { makeAdmin(player.userId) } })}><CrownIcon /></button>
+                            <div className='  d-flex align-items-center gap-3'>
+                                <button className="player-row__action" aria-label="Rendi admin" onClick={() => setAYSPopup({ show: true, message: `Sei sicuro di voler rendere ${player.nickname} il nuovo admin della lobby?`, action: () => { makeAdmin(player.userId) } })}><CrownIcon /></button>
+                                <LobbyListItem player={player} you={false} />
+                            </div>
                             <button className="player-row__action" aria-label="Rimuovi dalla lobby" onClick={() => setAYSPopup({ show: true, message: `Vuoi davvero togliere il tuo bro ${player.nickname} dalla lobby?`, action: () => { deletePlayer(player.userId) } })}><Trash /></button>
                         </div>
 

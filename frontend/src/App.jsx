@@ -30,7 +30,7 @@ function App() {
                   <LobbySocketListener />
                   <Routes>
                     <Route path="/" element={<AccessPage />} />
-                    <Route path="/join/:lobbyCode" element={<AccessPage />} />
+                    <Route path="/join/:lobbyCodeUrl" element={<AccessPage />} />
                     <Route element={<DefaultLayout />}>
                       <Route path="/home" element={<HomePage />} />
                       <Route path="/lobby" element={<LobbyPage />} />
