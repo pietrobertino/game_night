@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 
 
-export default function EnterLobbyForm() {
+export default function EnterLobbyForm({ setEnterLobby }) {
 
     const [code, setCode] = useState('');
     const navigate = useNavigate();
@@ -38,15 +38,20 @@ export default function EnterLobbyForm() {
     }
 
     return (
-        <form onSubmit={handleForm}>
-            <label htmlFor="codeInput">Codice della lobby:</label>
-            <input type="text" name="codeInput" id="codeInput" maxLength={6} placeholder="123ABC" onBlur={() => setTouched(true)} onClick={() => { setTouched(false), setLobbyErr(false) }} onChange={handleChange} value={code} />
-            <button>Chiedi di entrare</button>
+        <form onSubmit={handleForm} className="join-lobby-form mt-4">
+            <label htmlFor="codeInput" className="join-lobby-form__label">Codice della lobby:</label>
+            <input type="text" name="codeInput" id="codeInput" maxLength={6} placeholder="123ABC" className="join-lobby-form__input" onBlur={() => setTouched(true)} onClick={() => { setTouched(false), setLobbyErr(false) }} onChange={handleChange} value={code} />
+            <div className=" d-flex align-items-center justify-content-between gap-3 ">
+                <button className="btn-pill btn-pill--green flex-grow-1">Chiedi di entrare</button>
+                <button className="btn-pill btn-pill--orange flex-grow-1" onClick={() => setEnterLobby(false)}>
+                    Annulla
+                </button>
+            </div>
             {
-                showErr && <div className=" text-danger">Codice lobby non valido: Deve essere di 6 caratteri </div>
+                showErr && <div className="join-lobby-form__error">Codice lobby non valido: Deve essere di 6 caratteri </div>
             }
             {
-                lobbyErr && <div className=" text-danger">La lobby {code} non esiste</div>
+                lobbyErr && <div className="join-lobby-form__error">La lobby {code} non esiste</div>
             }
         </form>
     )

@@ -103,10 +103,7 @@ export default function LobbyPage() {
                     {enterLobby ?
 
                         <>
-                            <EnterLobbyForm />
-                            <button onClick={() => setEnterLobby(false)}>
-                                Annulla
-                            </button>
+                            <EnterLobbyForm setEnterLobby={setEnterLobby} />
                         </>
                         :
 
