@@ -7,16 +7,16 @@ export default function LobbyBanner() {
     return (
         <>
             {lobbyCode &&
-                <>
+                <div className="lobby-info">
                     {
                         admin ?
 
-                            <h4 className=" text-warning">Host della lobby {lobbyCode}</h4 >
+                            <h4 className="lobby-info__code">Host della lobby <span>{lobbyCode}</span></h4 >
                             :
-                            <h4 className=" text-warning">Membro della lobby {lobbyCode}</h4>
+                            <h4 className="lobby-info__code">Membro della lobby <span>{lobbyCode}</span></h4>
                     }
 
-                </>
+                </div>
             }
         </>
     )
