@@ -4,6 +4,7 @@ import { useAccess } from "../contexts/AccessContext"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useLobby } from "../contexts/LobbyContext";
+import { Eye, EyeSlash } from 'react-bootstrap-icons'
 
 // children = i link per cambiare tipo di accesso, mostrati di fianco al bottone
 export default function AccessForm({ children }) {
@@ -142,10 +143,17 @@ export default function AccessForm({ children }) {
                         <div className="access-form__password">
                             <input type={showPassword ? 'text' : 'password'} id="password" name="password" className="access-form__input" placeholder="Password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} onBlur={() => setPassTouched(true)} onClick={() => { setLoginErr(false); setRegErr(false) }} />
                             <button type="button" className="access-form__eye" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'nascondi password' : 'mostra password'}>
-                                <i className={showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'}></i>
+                                {
+                                    showPassword ?
+                                        <EyeSlash />
+                                        :
+                                        <Eye />
+                                }
                             </button>
                         </div>
                         {showPassErr && <span className="access-form__error">Password non valida</span>}
+                        {loginErr && <span className="access-form__error ">Email e/o Password errata</span>}
+                        {regErr && <span className=" access-form__error">Esiste già un account registrato con questo indirizzo email</span>}
                     </div>
                 </>
             }
@@ -158,8 +166,6 @@ export default function AccessForm({ children }) {
                 {accessType === 'login' && 'Accedi'}
                 {accessType === 'registration' && 'Registrati'}
             </button>
-            {loginErr && <span className="access-form__error ">Email e/o Password errata</span>}
-            {regErr && <span className=" access-form__error">Esiste già un account registrato con questo indirizzo email</span>}
         </form >
     )
 }
