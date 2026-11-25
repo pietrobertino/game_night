@@ -20,7 +20,6 @@ export default function AccountPage() {
 
     //variabile per mostrare il form della password per eliminare l'account
     const [showPassInput, setShowPassInput] = useState(false);
-    const [showMessage, setShowMessage] = useState(false);
 
     // se /me ha risposto e non c'è nessun utente, torno alla pagina di accesso
     useEffect(() => {
@@ -41,29 +40,30 @@ export default function AccountPage() {
 
     return (
         <>
-            <h1>Account page</h1>
             {lobbyCode ?
 
-                <h2 className='text-danger'>Per accedere alla gestione del profilo non devi far parte di una lobby !</h2>
+                <h2 className='guess-alert__warning'>Per accedere alla gestione del profilo non devi far parte di una lobby!</h2>
                 :
                 user.account_type === 'guest' ?
                     <>
                         <NicknameForm />
-                        <button onClick={() => setAYSPopup({ show: true, message: 'Creando un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('registration') })}>Crea un account</button>
-                        <button onClick={() => setAYSPopup({ show: true, message: 'Accedendo ad un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('login') })}>Accedi al tuo account</button>
+                        <div className=' d-flex align-items-center gap-3 mt-3'>
+                            <button className=' flex-grow-1 btn-pill btn-pill--green' onClick={() => setAYSPopup({ show: true, message: 'Creando un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('registration') })}>Crea un account</button>
+                            <button className=' flex-grow-1 btn-pill btn-pill--orange' onClick={() => setAYSPopup({ show: true, message: 'Accedendo ad un account stai effettuanto un logout dall\'ingresso come guest, sei sicuro?', action: () => goToAccount('login') })}>Accedi al tuo account</button>
+                        </div>
                     </>
                     :
 
                     <>
                         <NicknameForm />
-                        <button onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler uscire dal tuo account?', action: () => goToAccount('guest') })} >Esci dall'account</button>
-                        <button onClick={() => setShowPassInput(true)} >Elimina account</button>
+                        <div className=' d-flex align-items-center gap-3 mt-3'>
+                            <button className='flex-grow-1 btn-pill btn-pill--orange' onClick={() => setAYSPopup({ show: true, message: 'Sei sicuro di voler uscire dal tuo account?', action: () => goToAccount('guest') })} >Esci dall'account</button>
+                            <button className='flex-grow-1 btn-pill btn-pill--red' onClick={() => setShowPassInput(true)} >Elimina account</button>
+                        </div>
                         {showPassInput &&
-                            <CancelAccountForm setShowPassInput={setShowPassInput} setShowMessage={setShowMessage} goToAccount={goToAccount} />
+                            <CancelAccountForm setShowPassInput={setShowPassInput} goToAccount={goToAccount} />
                         }
-                        {showMessage &&
-                            <h5 className=' text-danger'>Account eliminato, adesso verrai reindirizzato alla pagina di accesso</h5>
-                        }
+
                     </>
             }
 

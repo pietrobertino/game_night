@@ -42,12 +42,42 @@ export default function NicknameForm() {
     }
 
     return (
-        <form onSubmit={handleForm}>
-            <label htmlFor="nickname">Nickname:</label>
-            <input type="text" value={nickname} onChange={e => setNickname(e.target.value)} onBlur={() => setNickTouched(true)} onClick={() => setNickTouched(false)} />
-            {showNickErr && <span>Nickname non valido: Deve essere di almeno 4 caratteri</span>}
-            <button disabled={!nickValid || nickname === firstNickname} type='submit'>Cambia nickname</button>
-            {showNickMess && <span>Nickname aggiornato!</span>}
+
+        <form onSubmit={handleForm} className="nickname-form mt-4">
+            <label htmlFor="nickname" className="nickname-form__label">
+                Nickname:
+            </label>
+
+            <div className="nickname-form__row">
+                <input
+                    id="nickname"
+                    type="text"
+                    className={`nickname-form__input ${showNickErr ? "is-invalid" : ""}`}
+                    value={nickname}
+                    onChange={e => setNickname(e.target.value)}
+                    onBlur={() => setNickTouched(true)}
+                    onClick={() => setNickTouched(false)}
+                />
+                <button
+                    type="submit"
+                    className="btn-pill btn-pill--green nickname-form__submit"
+                    disabled={!nickValid || nickname === firstNickname}
+                >
+                    Cambia nickname
+                </button>
+            </div>
+
+            {showNickErr && (
+                <span className="nickname-form__error">
+                    Nickname non valido: Deve essere di almeno 4 caratteri
+                </span>
+            )}
+
+            {showNickMess && (
+                <span className="nickname-form__success">
+                    Nickname aggiornato!
+                </span>
+            )}
         </form>
     )
 }

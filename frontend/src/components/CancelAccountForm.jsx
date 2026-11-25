@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import api from '../api';
+import { usePopup } from '../contexts/PopupContext';
 
-export default function CancelAccountForm({ setShowPassInput, setShowMessage, goToAccount }) {
+export default function CancelAccountForm({ setShowPassInput, goToAccount }) {
+
+    const { setPopup } = usePopup();
 
     //variabile per mostrare l'input della password per eliminare l'account
     const [showPassword, setShowPassword] = useState(false);
@@ -13,7 +16,7 @@ export default function CancelAccountForm({ setShowPassInput, setShowMessage, go
         api.post('/accounts/delete', { password })
             .then(res => {
                 setShowPassInput(false);
-                setShowMessage(true);
+                setPopup('Account eliminato, adesso verrai reindirizzato alla pagina di accesso');
                 setTimeout(goToAccount('guest'), 3000)
 
             })

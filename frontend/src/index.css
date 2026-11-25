@@ -938,3 +938,70 @@ body::-webkit-scrollbar {
     font-size: 12px;
     line-height: 1.2;
 }
+
+/* ---------- NICKNAME FORM ---------- */
+
+.nickname-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nickname-form__label {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.nickname-form__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nickname-form__input {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--gn-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gn-text);
+    font-family: var(--gn-font-body);
+    font-weight: 500;
+    font-size: 14px;
+    outline: none;
+}
+
+.nickname-form__input:focus {
+    border-color: var(--gn-accent);
+}
+
+.nickname-form__input.is-invalid {
+    border-color: var(--gn-red);
+}
+
+.nickname-form__submit {
+    flex-shrink: 0;
+    height: 34px;
+    padding: 0 16px;
+}
+
+.nickname-form__submit:disabled {
+    opacity: 0.5;
+}
+
+.nickname-form__error {
+    color: var(--gn-red);
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.nickname-form__success {
+    color: var(--gn-green);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+}
