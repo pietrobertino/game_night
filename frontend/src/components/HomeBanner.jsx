@@ -3,9 +3,11 @@ import { Person, Star, StarFill, Search } from "react-bootstrap-icons"
 import { useAuth } from "../contexts/AuthContext"
 import { useSearch } from "../contexts/SearchContext";
 import { usePopup } from "../contexts/PopupContext";
+import { useLobby } from "../contexts/LobbyContext";
 
 export default function HomeBanner() {
 
+    const { lobbyCode } = useLobby();
     const { setPopup } = usePopup();
     const { user } = useAuth();
     const { showSearch, setShowSearch, showFavs, setSearchParams, setSearch } = useSearch();
@@ -33,7 +35,12 @@ export default function HomeBanner() {
                     :
                     <button aria-label="Preferiti" className=" btn text-white  home-banner__item" onClick={handleFavsToggle}>{showFavs ? <StarFill /> : <Star />}</button>
             }
-            <Link aria-label="Profilo" className="home-banner__item " to={`/account`} ><Person /></Link>
+            {
+                lobbyCode ?
+                    <button aria-label="Profilo" className=" btn text-white home-banner__item " onClick={() => setPopup('Per accedere alla gestione del profilo non devi far parte di una lobby!')}><Person /></button>
+                    :
+                    <Link aria-label="Profilo" className="home-banner__item " to={`/account`} ><Person /></Link>
+            }
 
         </nav>
 

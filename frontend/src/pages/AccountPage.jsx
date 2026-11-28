@@ -40,10 +40,7 @@ export default function AccountPage() {
 
     return (
         <>
-            {lobbyCode ?
-
-                <h2 className='guess-alert__warning'>Per accedere alla gestione del profilo non devi far parte di una lobby!</h2>
-                :
+            {
                 user.account_type === 'guest' ?
                     <>
                         <NicknameForm />
