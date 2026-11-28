@@ -5,44 +5,46 @@ import { useLobby } from "../contexts/LobbyContext";
 import { usePopup } from "../contexts/PopupContext";
 
 export default function InvitePopup() {
-
     const { showInvitePopup, setShowInvitePopup } = usePopup();
     const { admin } = useLobby();
     const { acceptPlayer, deletePlayer } = useApproval();
 
-    const [nickname, setNickname] = useState('');
-    const [playerId, setPlayerId] = useState('');
+    const [nickname, setNickname] = useState("");
+    const [playerId, setPlayerId] = useState("");
 
     useEffect(() => {
+        let timer;
 
         const onRequested = ({ userId, nickname }) => {
             setShowInvitePopup(true);
             setNickname(nickname);
             setPlayerId(userId);
-            setTimeout(() => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
                 setShowInvitePopup(false);
-            }, 5000)
+            }, 5000);
         };
 
-        socket.on('player_requested', onRequested);
+        socket.on("player_requested", onRequested);
 
         return () => {
-            socket.off('player_requested', onRequested);
-
+            clearTimeout(timer);
+            socket.off("player_requested", onRequested);
         };
-    }, [])
+    }, [setShowInvitePopup]);
 
+    if (!admin || !showInvitePopup) return null;
 
     return (
-        <>
-            {(admin && showInvitePopup) &&
-                <>
-                    <h3 className=" text-danger">{nickname} vorrebbe entrare nella lobby.</h3>
-                    <button className=" btn btn-primary" onClick={() => { acceptPlayer(playerId); setShowInvitePopup(false) }}>Accetta</button>
-                    <button className=" btn btn-danger" onClick={() => { deletePlayer(playerId); setShowInvitePopup(false) }}>Rifiuta</button>
-                    <button className=" btn btn-close" onClick={() => setShowInvitePopup(false)}></button>
-                </>
-            }
-        </>
-    )
+        <div className="popup" onClick={() => setShowInvitePopup(false)}>
+            <div className="popup__box invite-popup__box" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="popup__close" onClick={() => setShowInvitePopup(false)}>X</button>
+                <h3 className="invite-popup__message"><span>{nickname}</span> vorrebbe entrare nella lobby.</h3>
+                <div className="invite-popup__actions">
+                    <button type="button" className="btn-pill btn-pill--red" onClick={() => { deletePlayer(playerId); setShowInvitePopup(false); }}>Rifiuta</button>
+                    <button type="button" className="btn-pill btn-pill--green" onClick={() => { acceptPlayer(playerId); setShowInvitePopup(false); }}>Accetta</button>
+                </div>
+            </div>
+        </div>
+    );
 }

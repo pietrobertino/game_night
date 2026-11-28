@@ -623,6 +623,199 @@ a:hover {
     font-weight: 500;
 }
 
+/* ---------- POPUP CONFERMA ---------- */
+
+.confirm-popup__box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: var(--gn-bg);
+    border: 1px solid var(--gn-border);
+    color: var(--gn-text);
+}
+
+.confirm-popup__message {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
+.confirm-popup__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.confirm-popup__actions .btn-pill {
+    padding: 10px 18px;
+    flex-shrink: 0;
+}
+
+/* ---------- DELETE ACCOUNT FORM ---------- */
+
+.delete-account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.delete-account-form__title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.delete-account-form__label {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.delete-account-form__input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.delete-account-form__input {
+    width: 100%;
+    height: 36px;
+    padding: 0 42px 0 14px;
+    border: 1px solid var(--gn-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gn-text);
+    font-family: var(--gn-font-body);
+    font-weight: 500;
+    font-size: 14px;
+    outline: none;
+}
+
+.delete-account-form__input:focus {
+    border-color: var(--gn-accent);
+}
+
+.delete-account-form__input.is-invalid {
+    border-color: var(--gn-red);
+}
+
+.delete-account-form__toggle {
+    position: absolute;
+    right: 12px;
+    padding: 4px;
+    border: 0;
+    background: none;
+    color: var(--gn-border);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.delete-account-form__error {
+    margin: 0;
+    color: var(--gn-red);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.delete-account-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.delete-account-form__actions .btn-pill {
+    padding: 10px 18px;
+}
+
+/* ---------- GENERIC POPUP ---------- */
+
+.generic-popup__box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 20px 22px;
+    background-color: var(--gn-bg);
+    border: 1px solid var(--gn-border);
+    color: var(--gn-text);
+}
+
+.generic-popup__text {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.generic-popup__close {
+    position: static;
+    flex-shrink: 0;
+    padding: 4px;
+    color: var(--gn-text);
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* ---------- QR POPUP ---------- */
+
+.qr-popup__box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.qr-popup__text {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+/* ---------- INVITE POPUP ---------- */
+
+.invite-popup__box {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background-color: var(--gn-bg);
+    border: 1px solid var(--gn-border);
+    color: var(--gn-text);
+}
+
+.invite-popup__message {
+    margin: 0;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.35;
+}
+
+.invite-popup__message span {
+    color: var(--gn-accent);
+}
+
+.invite-popup__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.invite-popup__actions .btn-pill {
+    padding: 10px 18px;
+}
+
 /* ---------- PRE GAME ---------- */
 
 .pregame-page {
