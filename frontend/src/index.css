@@ -145,20 +145,33 @@ a:hover {
 .game-card {
     position: relative;
     height: 188px;
+    border: 0;
     border-radius: var(--gn-radius-card);
     overflow: hidden;
+    background-color: #26292e;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 
+.game-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(28, 30, 33, 0.35) 0%, rgba(28, 30, 33, 0.75) 100%);
+    pointer-events: none;
+}
+
 .game-card__link {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
     padding: 18px 18px 22px;
     color: var(--gn-text);
+    text-decoration: none;
 }
 
 .game-card__title {
@@ -183,24 +196,37 @@ a:hover {
     text-transform: uppercase;
 }
 
-.game-card__players i {
-    font-size: 32px;
+.game-card__players i,
+.game-card__players svg {
+    width: 28px;
+    height: 28px;
+    font-size: 28px;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .game-card__fav {
     position: absolute;
     top: 14px;
     right: 14px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 4px;
     border: 0;
     background: none;
     color: var(--gn-text);
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1;
+    cursor: pointer;
 }
 
-.game-card:active {
+.game-card__fav.is-active {
+    color: var(--gn-accent);
+}
+
+.game-card.is-pressing {
     transform: scale(0.98);
     transition: transform 0.1s ease;
 }
